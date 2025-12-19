@@ -52,7 +52,6 @@ function MyApp({ Component, pageProps }: AppProps) {
       <GlobalStyle />
 
       <Providers>
-        <Modals />
         <Navbar items={navItems} />
         <TinaEditProvider
           editMode={
@@ -81,6 +80,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 function Providers<T>({ children }: PropsWithChildren<T>) {
   return (
     <NewsletterModalContextProvider>
+      <Modals />
       <NavigationDrawer items={navItems}>{children}</NavigationDrawer>
     </NewsletterModalContextProvider>
   );
