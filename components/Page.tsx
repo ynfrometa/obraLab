@@ -44,16 +44,22 @@ const HeaderContainer = styled.div`
   align-items: center;
   justify-content: center;
   background: rgb(var(--secondary));
-  min-height: 40rem;
+  min-height: 20rem;
+  padding: 3rem 0;
+
+  ${media('<=tablet')} {
+    min-height: 15rem;
+    padding: 2rem 0;
+  }
 `;
 
 const Title = styled(SectionTitle)`
   color: rgb(var(--textSecondary));
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 `;
 
 const Description = styled.div`
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: rgba(var(--textSecondary), 0.8);
   text-align: center;
   max-width: 60%;
@@ -61,6 +67,7 @@ const Description = styled.div`
 
   ${media('<=tablet')} {
     max-width: 100%;
+    font-size: 1.4rem;
   }
 `;
 

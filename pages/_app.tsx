@@ -20,9 +20,12 @@ import { NewsletterModalContextProvider, useNewsletterModalContext } from 'conte
 import { NavItems } from 'types';
 
 const navItems: NavItems = [
-  { title: 'Awesome SaaS Features', href: '/features' },
-  { title: 'Pricing', href: '/pricing' },
-  { title: 'Contact', href: '/contact' },
+  { title: 'Empresas', href: '/empresas' },
+  { title: 'Constructoras', href: '/constructoras' },
+  { title: 'Trabajadores', href: '/trabajadores' },
+  { title: 'Obras', href: '/obras' },
+  { title: 'Hoja de Mediciones', href: '/hoja-mediciones' },
+  { title: 'Actividades', href: '/actividades' },
   { title: 'Sign up', href: '/sign-up', outlined: true },
 ];
 
