@@ -50,11 +50,12 @@ export default function SingleArticlePage(props: InferGetStaticPropsType<typeof 
   }, []);
 
   const { slug, data } = props;
-  const content = data.getPostsDocument.data.body;
-
-  if (!data) {
+  
+  if (!data || !data.getPostsDocument) {
     return null;
   }
+  
+  const content = data.getPostsDocument.data.body;
   const { title, description, date, tags, imageUrl } = data.getPostsDocument.data as NonNullableChildrenDeep<Posts>;
   const meta = { title, description, date: date, tags, imageUrl, author: '' };
   const formattedDate = formatDate(new Date(date));
@@ -79,37 +80,45 @@ export default function SingleArticlePage(props: InferGetStaticPropsType<typeof 
 }
 
 export async function getStaticPaths() {
-  const postsListData = await staticRequest({
-    query: `
-      query PostsSlugs{
-        getPostsList{
-          edges{
-            node{
-              sys{
-                basename
+  try {
+    const postsListData = await staticRequest({
+      query: `
+        query PostsSlugs{
+          getPostsList{
+            edges{
+              node{
+                sys{
+                  basename
+                }
               }
             }
           }
         }
-      }
-    `,
-    variables: {},
-  });
+      `,
+      variables: {},
+    });
 
-  if (!postsListData) {
+    if (!postsListData) {
+      return {
+        paths: [],
+        fallback: false,
+      };
+    }
+
+    type NullAwarePostsList = { getPostsList: NonNullableChildrenDeep<Query['getPostsList']> };
+    return {
+      paths: (postsListData as NullAwarePostsList).getPostsList.edges.map((edge) => ({
+        params: { slug: normalizePostName(edge.node.sys.basename) },
+      })),
+      fallback: false,
+    };
+  } catch (error) {
+    console.warn('Error fetching blog posts for static paths:', error);
     return {
       paths: [],
       fallback: false,
     };
   }
-
-  type NullAwarePostsList = { getPostsList: NonNullableChildrenDeep<Query['getPostsList']> };
-  return {
-    paths: (postsListData as NullAwarePostsList).getPostsList.edges.map((edge) => ({
-      params: { slug: normalizePostName(edge.node.sys.basename) },
-    })),
-    fallback: false,
-  };
 }
 
 function normalizePostName(postName: string) {
@@ -134,14 +143,27 @@ export async function getStaticProps({ params }: GetStaticPropsContext<{ slug: s
     }
   `;
 
-  const data = (await staticRequest({
-    query: query,
-    variables: variables,
-  })) as { getPostsDocument: PostsDocument };
+  try {
+    const data = (await staticRequest({
+      query: query,
+      variables: variables,
+    })) as { getPostsDocument?: PostsDocument } | null;
 
-  return {
-    props: { slug, variables, query, data },
-  };
+    if (!data || !data.getPostsDocument) {
+      return {
+        notFound: true as const,
+      };
+    }
+
+    return {
+      props: { slug, variables, query, data: data as { getPostsDocument: PostsDocument } },
+    };
+  } catch (error) {
+    console.warn('Error fetching blog post:', error);
+    return {
+      notFound: true as const,
+    };
+  }
 }
 
 const CustomContainer = styled(Container)`
