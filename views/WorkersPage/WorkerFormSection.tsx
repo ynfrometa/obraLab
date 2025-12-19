@@ -30,9 +30,10 @@ export default function WorkerFormSection() {
   useEffect(() => {
     if (!database) return;
 
+    const db = database;
     const loadEmpresas = async () => {
       try {
-        const empresasCollection = collection(database, 'empresas');
+        const empresasCollection = collection(db, 'empresas');
         const empresasQuery = query(empresasCollection, orderBy('nombre', 'asc'));
         const snapshot = await getDocs(empresasQuery);
         const empresas = snapshot.docs.map(doc => ({
@@ -90,9 +91,11 @@ export default function WorkerFormSection() {
       console.log('Datos guardados:', newWorker);
       
       // Verificar que se guardó correctamente leyendo de nuevo
-      setTimeout(async () => {
-        try {
-          const verifyDoc = doc(database, 'workers', docRef.id);
+      const db = database;
+      if (db) {
+        setTimeout(async () => {
+          try {
+            const verifyDoc = doc(db, 'workers', docRef.id);
           const docSnap = await getDoc(verifyDoc);
           if (docSnap.exists()) {
             console.log('✅ Verificación: El trabajador existe en Firestore');
@@ -100,10 +103,11 @@ export default function WorkerFormSection() {
           } else {
             console.warn('⚠️ Advertencia: El trabajador no se encontró después de guardar');
           }
-        } catch (verifyError) {
-          console.error('Error al verificar:', verifyError);
-        }
-      }, 1000);
+          } catch (verifyError) {
+            console.error('Error al verificar:', verifyError);
+          }
+        }, 1000);
+      }
       
       setHasSuccessfullyAdded(true);
       reset();

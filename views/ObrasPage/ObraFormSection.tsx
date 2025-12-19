@@ -36,6 +36,7 @@ export default function ObraFormSection() {
     if (!database) return;
 
     const loadEmpresas = async () => {
+      if (!database) return;
       try {
         const empresasCollection = collection(database, 'empresas');
         const empresasQuery = query(empresasCollection, orderBy('nombre', 'asc'));
@@ -121,20 +122,23 @@ export default function ObraFormSection() {
       console.log('Datos guardados:', newObra);
       
       // Verificar que se guardó correctamente
-      setTimeout(async () => {
-        try {
-          const verifyDoc = doc(database, 'obras', docRef.id);
-          const docSnap = await getDoc(verifyDoc);
-          if (docSnap.exists()) {
-            console.log('✅ Verificación: La obra existe en Firestore');
-            console.log('Datos verificados:', docSnap.data());
-          } else {
-            console.warn('⚠️ Advertencia: La obra no se encontró después de guardar');
+      const db = database;
+      if (db) {
+        setTimeout(async () => {
+          try {
+            const verifyDoc = doc(db, 'obras', docRef.id);
+            const docSnap = await getDoc(verifyDoc);
+            if (docSnap.exists()) {
+              console.log('✅ Verificación: La obra existe en Firestore');
+              console.log('Datos verificados:', docSnap.data());
+            } else {
+              console.warn('⚠️ Advertencia: La obra no se encontró después de guardar');
+            }
+          } catch (verifyError) {
+            console.error('Error al verificar:', verifyError);
           }
-        } catch (verifyError) {
-          console.error('Error al verificar:', verifyError);
-        }
-      }, 1000);
+        }, 1000);
+      }
       
       setHasSuccessfullyAdded(true);
       setEmpresasSeleccionadas([]);
