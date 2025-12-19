@@ -607,10 +607,16 @@ const TotalValue = styled.span`
   color: rgb(var(--primary));
 `;
 
-const AddButton = styled(Button)`
+const AddButton = styled.button`
   background: rgb(var(--primary));
   color: white;
   border: none;
+  border-radius: 0.6rem;
+  padding: 1rem 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
 
   &:hover:not(:disabled) {
     opacity: 0.9;
