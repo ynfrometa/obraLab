@@ -31,7 +31,7 @@ interface Medicion {
   cantidad?: string;
   total?: string;
   observaciones?: string;
-  fechaCreacion: number;
+  fechaCreacion?: number;
 }
 
 export default function MedicionesListSection() {

@@ -21,6 +21,7 @@ interface Obra {
   estado: string;
   fechaInicio: string;
   solicitud: string;
+  fechaCreacion?: number;
 }
 
 interface EditObraFormProps {

@@ -14,7 +14,7 @@ interface ConceptoItem {
   alto: string;
   cantidad: string;
   total: string;
-  observaciones: string;
+  observaciones?: string;
 }
 
 interface MedicionPayload {

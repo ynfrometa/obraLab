@@ -13,7 +13,7 @@ interface ConceptoItem {
   alto: string;
   cantidad: string;
   total: string;
-  observaciones: string;
+  observaciones?: string;
 }
 
 interface Medicion {
@@ -29,6 +29,7 @@ interface Medicion {
   cantidad?: string;
   total?: string;
   observaciones?: string;
+  fechaCreacion?: number;
 }
 
 interface EditMedicionFormProps {
