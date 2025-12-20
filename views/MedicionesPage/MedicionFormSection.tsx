@@ -376,20 +376,22 @@ export default function MedicionFormSection() {
               </CompanyDetail>
               <CompanyDetail>
                 <Label>Teléfonos:</Label>
-                <StyledInput
-                  type="tel"
-                  placeholder="Teléfono 1 *"
-                  id="empresaTelefono1"
-                  readOnly
-                  {...register('empresaTelefono1', { required: true })}
-                />
-                <StyledInput
-                  type="tel"
-                  placeholder="Teléfono 2"
-                  id="empresaTelefono2"
-                  readOnly
-                  {...register('empresaTelefono2')}
-                />
+                <PhoneInputsWrapper>
+                  <StyledInput
+                    type="tel"
+                    placeholder="Teléfono 1 *"
+                    id="empresaTelefono1"
+                    readOnly
+                    {...register('empresaTelefono1', { required: true })}
+                  />
+                  <StyledInput
+                    type="tel"
+                    placeholder="Teléfono 2"
+                    id="empresaTelefono2"
+                    readOnly
+                    {...register('empresaTelefono2')}
+                  />
+                </PhoneInputsWrapper>
               </CompanyDetail>
             </CompanyInfo>
           </HeaderRight>
@@ -542,6 +544,10 @@ const HeaderRight = styled.div`
     min-width: auto;
     width: 100%;
   }
+
+  ${media('<=phone')} {
+    justify-content: flex-start;
+  }
 `;
 
 const ProjectInfo = styled.div`
@@ -554,6 +560,12 @@ const ProjectRow = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 `;
 
 const ProjectLabel = styled.label`
@@ -561,11 +573,21 @@ const ProjectLabel = styled.label`
   font-size: 1.4rem;
   color: rgb(var(--text));
   min-width: 12rem;
+
+  ${media('<=phone')} {
+    min-width: auto;
+    font-size: 1.3rem;
+  }
 `;
 
 const ProjectValue = styled.div`
   flex: 1;
   min-width: 20rem;
+
+  ${media('<=phone')} {
+    min-width: 100%;
+    width: 100%;
+  }
 `;
 
 const CompanyInfo = styled.div`
@@ -595,15 +617,58 @@ const CompanyDetail = styled.div`
   gap: 0.5rem;
   align-items: center;
   width: 100%;
+  flex-wrap: wrap;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.8rem;
+  }
 
   input {
     flex: 1;
+    min-width: 12rem;
+
+    ${media('<=phone')} {
+      min-width: 100% !important;
+      width: 100% !important;
+      flex: none !important;
+      display: block;
+    }
   }
 
   label {
     min-width: 8rem;
     font-size: 1.4rem;
     margin-bottom: 0;
+
+    ${media('<=phone')} {
+      min-width: auto;
+      width: 100%;
+      font-size: 1.3rem;
+      margin-bottom: 0;
+      order: -1;
+      display: block;
+    }
+  }
+`;
+
+const PhoneInputsWrapper = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  width: 100%;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+
+    input {
+      width: 100% !important;
+      min-width: 100% !important;
+      flex: none !important;
+    }
   }
 `;
 
@@ -614,6 +679,10 @@ const ConceptosSection = styled.div`
   border: 2px solid rgba(var(--text), 0.25);
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ${media('<=phone')} {
+    padding: 1rem;
+  }
 `;
 
 const ConceptosHeader = styled.div`
@@ -867,6 +936,13 @@ const EmptyState = styled.p`
 const TableContainer = styled.div`
   overflow-x: auto;
   margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+
+  ${media('<=phone')} {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 0 1rem;
+  }
 `;
 
 const Table = styled.table`
@@ -874,6 +950,12 @@ const Table = styled.table`
   border-collapse: collapse;
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
+  min-width: 600px;
+
+  ${media('<=phone')} {
+    min-width: 500px;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableHeader = styled.thead`
@@ -899,12 +981,21 @@ const TableHeaderCell = styled.th`
   color: rgb(var(--text));
   border: 1px solid rgba(var(--text), 0.2);
   background: rgba(var(--primary), 0.1);
+
+  ${media('<=phone')} {
+    padding: 0.8rem 0.5rem;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableCell = styled.td`
   padding: 0.5rem;
   border: 1px solid rgba(var(--text), 0.2);
   vertical-align: middle;
+
+  ${media('<=phone')} {
+    padding: 0.4rem 0.3rem;
+  }
 `;
 
 const TableInput = styled.input`
@@ -915,6 +1006,11 @@ const TableInput = styled.input`
   font-size: 1.3rem;
   background: transparent;
   transition: border-color 0.2s;
+
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+  }
 
   &:focus {
     outline: none;

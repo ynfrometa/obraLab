@@ -278,6 +278,11 @@ const ObraCard = styled.div`
   transition: transform 0.2s, box-shadow 0.2s;
   border: 2px solid rgba(var(--text), 0.1);
 
+  ${media('<=phone')} {
+    padding: 1.5rem;
+    font-size: 1.4rem;
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
@@ -300,6 +305,10 @@ const HeaderContent = styled.div`
   ${media('<=tablet')} {
     flex-direction: column;
     gap: 1.5rem;
+  }
+
+  ${media('<=phone')} {
+    gap: 1rem;
   }
 `;
 
@@ -326,6 +335,12 @@ const ProjectRow = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 `;
 
 const ProjectLabel = styled.span`
@@ -334,6 +349,12 @@ const ProjectLabel = styled.span`
   color: rgb(var(--text));
   min-width: 12rem;
   letter-spacing: 0.01em;
+
+  ${media('<=phone')} {
+    min-width: auto;
+    font-size: 1.3rem;
+    width: 100%;
+  }
 `;
 
 const ProjectValue = styled.span`
@@ -342,6 +363,11 @@ const ProjectValue = styled.span`
   color: rgb(var(--text));
   line-height: 1.6;
   letter-spacing: 0.01em;
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    width: 100%;
+  }
 `;
 
 const ButtonGroup = styled.div`
@@ -398,6 +424,13 @@ const CardContent = styled.div`
 const TableContainer = styled.div`
   overflow-x: auto;
   margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+
+  ${media('<=phone')} {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 0 1.5rem;
+  }
 `;
 
 const Table = styled.table`
@@ -405,6 +438,12 @@ const Table = styled.table`
   border-collapse: collapse;
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
+  min-width: 500px;
+
+  ${media('<=phone')} {
+    min-width: 400px;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableBody = styled.tbody``;
@@ -426,10 +465,19 @@ const TableCell = styled.td`
   line-height: 1.5;
   letter-spacing: 0.01em;
 
+  ${media('<=phone')} {
+    padding: 0.8rem 0.5rem;
+    font-size: 1.2rem;
+  }
+
   &:first-child {
     font-weight: 600;
     min-width: 15rem;
     background: rgba(var(--primary), 0.05);
+
+    ${media('<=phone')} {
+      min-width: 12rem;
+    }
   }
 
   &:last-child {

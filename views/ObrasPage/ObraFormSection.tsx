@@ -380,6 +380,11 @@ const InputGroup = styled.div`
     margin-bottom: 1.2rem;
   }
 
+  ${media('<=phone')} {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -485,6 +490,12 @@ const CheckboxContainer = styled.div`
     grid-template-columns: 1fr;
     max-height: 10rem;
   }
+
+  ${media('<=phone')} {
+    padding: 0.8rem;
+    gap: 0.5rem;
+    max-height: 8rem;
+  }
 `;
 
 const CheckboxLabel = styled.label`
@@ -547,6 +558,11 @@ const FormSection = styled.div`
   ${media('<=tablet')} {
     padding: 1.2rem;
     gap: 1rem;
+  }
+
+  ${media('<=phone')} {
+    padding: 1rem;
+    gap: 0.8rem;
   }
 
   &:last-child {

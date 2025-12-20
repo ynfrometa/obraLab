@@ -11,6 +11,11 @@ const SectionTitle = styled.div`
   ${media('<=tablet')} {
     font-size: 4.6rem;
   }
+
+  ${media('<=phone')} {
+    font-size: 3.2rem;
+    padding: 0 1rem;
+  }
 `;
 
 export default SectionTitle;

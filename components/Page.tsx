@@ -51,6 +51,11 @@ const HeaderContainer = styled.div`
     min-height: 15rem;
     padding: 2rem 0;
   }
+
+  ${media('<=phone')} {
+    min-height: 12rem;
+    padding: 1.5rem 0;
+  }
 `;
 
 const Title = styled(SectionTitle)`
@@ -69,9 +74,24 @@ const Description = styled.div`
     max-width: 100%;
     font-size: 1.4rem;
   }
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    padding: 0 1rem;
+  }
 `;
 
 const ChildrenWrapper = styled.div`
   margin-top: 10rem;
   margin-bottom: 10rem;
+
+  ${media('<=tablet')} {
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+  }
+
+  ${media('<=phone')} {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+  }
 `;

@@ -325,20 +325,22 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
             </CompanyDetail>
             <CompanyDetail>
               <Label>Teléfonos:</Label>
-              <StyledInput
-                type="tel"
-                placeholder="Teléfono 1 *"
-                id="empresaTelefono1"
-                readOnly
-                {...register('empresaTelefono1', { required: true })}
-              />
-              <StyledInput
-                type="tel"
-                placeholder="Teléfono 2"
-                id="empresaTelefono2"
-                readOnly
-                {...register('empresaTelefono2')}
-              />
+              <PhoneInputsWrapper>
+                <StyledInput
+                  type="tel"
+                  placeholder="Teléfono 1 *"
+                  id="empresaTelefono1"
+                  readOnly
+                  {...register('empresaTelefono1', { required: true })}
+                />
+                <StyledInput
+                  type="tel"
+                  placeholder="Teléfono 2"
+                  id="empresaTelefono2"
+                  readOnly
+                  {...register('empresaTelefono2')}
+                />
+              </PhoneInputsWrapper>
             </CompanyDetail>
           </CompanyInfo>
         </HeaderRight>
@@ -578,10 +580,23 @@ const CompanyDetail = styled.div`
   min-width: 0;
   flex-wrap: wrap;
 
+  ${media('<=phone')} {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.8rem;
+  }
+
   input {
     flex: 1;
     min-width: 12rem;
     max-width: 100%;
+
+    ${media('<=phone')} {
+      min-width: 100% !important;
+      width: 100% !important;
+      flex: none !important;
+      display: block;
+    }
   }
 
   label {
@@ -593,6 +608,31 @@ const CompanyDetail = styled.div`
     ${media('<=tablet')} {
       min-width: auto;
       width: 100%;
+    }
+
+    ${media('<=phone')} {
+      order: -1;
+      margin-bottom: 0;
+      display: block;
+    }
+  }
+`;
+
+const PhoneInputsWrapper = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  width: 100%;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+
+    input {
+      width: 100% !important;
+      min-width: 100% !important;
+      flex: none !important;
     }
   }
 `;
@@ -888,6 +928,12 @@ const Table = styled.table`
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
   table-layout: fixed;
+  min-width: 600px;
+
+  ${media('<=phone')} {
+    min-width: 500px;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableHeader = styled.thead`

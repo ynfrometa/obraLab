@@ -179,6 +179,12 @@ const NavbarContainer = styled.div<NavbarContainerProps>`
   transition-property: transform, visibility, height, box-shadow, background-color;
   transition-duration: 0.15s;
   transition-timing-function: ease-in-out;
+
+  ${media('<=phone')} {
+    height: 7rem;
+    padding: 1rem 0;
+    transform: ${(p) => (p.hidden ? `translateY(-7rem) translateZ(0) scale(1)` : 'translateY(0) translateZ(0) scale(1)')};
+  }
 `;
 
 const Content = styled(Container)`

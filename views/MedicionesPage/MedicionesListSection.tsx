@@ -319,6 +319,11 @@ const MedicionCard = styled.div`
   transition: transform 0.2s, box-shadow 0.2s;
   border: 2px solid rgba(var(--text), 0.1);
 
+  ${media('<=phone')} {
+    padding: 1.5rem;
+    font-size: 1.4rem;
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
@@ -342,6 +347,10 @@ const HeaderContent = styled.div`
     flex-direction: column;
     gap: 1.5rem;
   }
+
+  ${media('<=phone')} {
+    gap: 1rem;
+  }
 `;
 
 const HeaderLeft = styled.div`
@@ -358,6 +367,10 @@ const HeaderRight = styled.div`
     min-width: auto;
     width: 100%;
     text-align: left;
+  }
+
+  ${media('<=phone')} {
+    justify-content: flex-start;
   }
 `;
 
@@ -476,6 +489,13 @@ const CardContent = styled.div`
 const TableContainer = styled.div`
   overflow-x: auto;
   margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+
+  ${media('<=phone')} {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 0 1.5rem;
+  }
 `;
 
 const Table = styled.table`
@@ -483,6 +503,12 @@ const Table = styled.table`
   border-collapse: collapse;
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
+  min-width: 600px;
+
+  ${media('<=phone')} {
+    min-width: 500px;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableHeader = styled.thead`
@@ -508,6 +534,11 @@ const TableHeaderCell = styled.th`
   color: rgb(var(--text));
   border: 1px solid rgba(var(--text), 0.2);
   background: rgba(var(--primary), 0.1);
+
+  ${media('<=phone')} {
+    padding: 0.8rem 0.5rem;
+    font-size: 1.2rem;
+  }
 `;
 
 const TableCell = styled.td`
@@ -517,6 +548,11 @@ const TableCell = styled.td`
   font-size: 1.4rem;
   line-height: 1.5;
   letter-spacing: 0.01em;
+
+  ${media('<=phone')} {
+    padding: 0.8rem 0.5rem;
+    font-size: 1.2rem;
+  }
 
   &:first-child {
     font-weight: 600;
