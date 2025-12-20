@@ -1,35 +1,18 @@
-import NextLink from 'next/link';
 import styled from 'styled-components';
-import Button from 'components/Button';
-import ButtonGroup from 'components/ButtonGroup';
 import Container from 'components/Container';
 import HeroIllustration from 'components/HeroIllustation';
 import OverTitle from 'components/OverTitle';
-import { useNewsletterModalContext } from 'contexts/newsletter-modal.context';
 import { media } from 'utils/media';
 
 export default function Hero() {
-  const { setIsModalOpened } = useNewsletterModalContext();
-
   return (
     <HeroWrapper>
       <Contents>
-        <CustomOverTitle>the coolest, saas product you have ever seen</CustomOverTitle>
-        <Heading>Make your life easier with our SaaS</Heading>
+        <CustomOverTitle>Gestión inteligente para proyectos de construcción</CustomOverTitle>
+        <Heading>Simplifica el control de obras, mediciones y equipos desde una sola plataforma.</Heading>
         <Description>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis, tempora qui. Explicabo voluptate iure ipsum molestias
-          repudiandae perspiciatis nostrum praesentium, unde pariatur tempora magni rem. Necessitatibus facilis obcaecati ratione.
+          Optimiza tiempos, reduce errores y toma decisiones con datos claros y en tiempo real.
         </Description>
-        <CustomButtonGroup>
-          <Button onClick={() => setIsModalOpened(true)}>
-            Subscribe to the newsletter <span>&rarr;</span>
-          </Button>
-          <NextLink href="#whitepaper" passHref>
-            <Button transparent>
-              Features <span>&rarr;</span>
-            </Button>
-          </NextLink>
-        </CustomButtonGroup>
       </Contents>
       <ImageContainer>
         <HeroIllustration />
@@ -58,9 +41,6 @@ const Contents = styled.div`
   }
 `;
 
-const CustomButtonGroup = styled(ButtonGroup)`
-  margin-top: 4rem;
-`;
 
 const ImageContainer = styled.div`
   display: flex;
