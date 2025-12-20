@@ -393,6 +393,14 @@ const ProjectRow = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+    width: 100%;
+  }
 `;
 
 const ProjectLabel = styled.span`
@@ -401,6 +409,12 @@ const ProjectLabel = styled.span`
   color: rgb(var(--text));
   min-width: 12rem;
   letter-spacing: 0.01em;
+
+  ${media('<=phone')} {
+    min-width: auto;
+    font-size: 1.3rem;
+    width: 100%;
+  }
 `;
 
 const ProjectValue = styled.span`
@@ -409,6 +423,11 @@ const ProjectValue = styled.span`
   color: rgb(var(--text));
   line-height: 1.6;
   letter-spacing: 0.01em;
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    width: 100%;
+  }
 `;
 
 const CompanyInfo = styled.div`
@@ -416,9 +435,16 @@ const CompanyInfo = styled.div`
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-end;
+  width: 100%;
 
   ${media('<=tablet')} {
     align-items: flex-start;
+    width: 100%;
+  }
+
+  ${media('<=phone')} {
+    gap: 0.4rem;
+    width: 100%;
   }
 `;
 

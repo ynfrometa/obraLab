@@ -483,6 +483,12 @@ const HeaderSection = styled.div`
   ${media('<=tablet')} {
     flex-direction: column;
     gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  ${media('<=phone')} {
+    padding: 1rem;
+    gap: 1rem;
   }
 `;
 
@@ -502,12 +508,22 @@ const HeaderRight = styled.div`
   ${media('<=tablet')} {
     width: 100%;
   }
+
+  ${media('<=phone')} {
+    justify-content: flex-start;
+    width: 100%;
+  }
 `;
 
 const ProjectInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+
+  ${media('<=phone')} {
+    gap: 0.8rem;
+  }
 `;
 
 const ProjectRow = styled.div`
@@ -522,6 +538,11 @@ const ProjectRow = styled.div`
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  ${media('<=phone')} {
+    align-items: stretch;
+    width: 100%;
+  }
 `;
 
 const ProjectLabel = styled.label`
@@ -535,6 +556,11 @@ const ProjectLabel = styled.label`
     min-width: auto;
     width: 100%;
   }
+
+  ${media('<=phone')} {
+    margin-bottom: 0.3rem;
+    font-size: 1.2rem;
+  }
 `;
 
 const ProjectValue = styled.div`
@@ -542,6 +568,16 @@ const ProjectValue = styled.div`
   min-width: 0;
   max-width: 100%;
   width: 100%;
+
+  ${media('<=phone')} {
+    flex: none;
+    width: 100%;
+
+    input, select {
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+  }
 `;
 
 const CompanyInfo = styled.div`
@@ -559,6 +595,11 @@ const CompanyInfo = styled.div`
     text-align: left;
     width: 100%;
   }
+
+  ${media('<=phone')} {
+    gap: 0.8rem;
+    width: 100%;
+  }
 `;
 
 const CompanyName = styled.div`
@@ -569,6 +610,17 @@ const CompanyName = styled.div`
   width: 100%;
   max-width: 100%;
   min-width: 0;
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    width: 100%;
+
+    select, input {
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+  }
 `;
 
 const CompanyDetail = styled.div`
@@ -584,6 +636,7 @@ const CompanyDetail = styled.div`
     flex-direction: column;
     align-items: stretch;
     gap: 0.8rem;
+    width: 100%;
   }
 
   input {
@@ -596,6 +649,7 @@ const CompanyDetail = styled.div`
       width: 100% !important;
       flex: none !important;
       display: block;
+      box-sizing: border-box;
     }
   }
 
@@ -612,7 +666,7 @@ const CompanyDetail = styled.div`
 
     ${media('<=phone')} {
       order: -1;
-      margin-bottom: 0;
+      margin-bottom: 0.3rem;
       display: block;
     }
   }
@@ -633,6 +687,7 @@ const PhoneInputsWrapper = styled.div`
       width: 100% !important;
       min-width: 100% !important;
       flex: none !important;
+      box-sizing: border-box;
     }
   }
 `;
@@ -763,6 +818,11 @@ const StyledInput = styled(Input)`
   max-width: 100%;
   box-sizing: border-box;
 
+  ${media('<=phone')} {
+    font-size: 1.2rem;
+    padding: 0.8rem 0.9rem;
+  }
+
   &:focus {
     outline: none;
     border-color: rgb(var(--primary));
@@ -805,6 +865,11 @@ const SelectInput = styled.select`
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+
+  ${media('<=phone')} {
+    font-size: 1.2rem;
+    padding: 0.8rem 0.9rem;
+  }
 
   &:focus {
     outline: none;

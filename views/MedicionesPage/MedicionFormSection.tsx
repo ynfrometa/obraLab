@@ -528,6 +528,12 @@ const HeaderSection = styled.div`
   ${media('<=tablet')} {
     flex-direction: column;
     gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  ${media('<=phone')} {
+    padding: 1rem;
+    gap: 1rem;
   }
 `;
 
@@ -547,6 +553,7 @@ const HeaderRight = styled.div`
 
   ${media('<=phone')} {
     justify-content: flex-start;
+    width: 100%;
   }
 `;
 
@@ -554,17 +561,24 @@ const ProjectInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+
+  ${media('<=phone')} {
+    gap: 0.8rem;
+  }
 `;
 
 const ProjectRow = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+  width: 100%;
 
   ${media('<=phone')} {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 0.5rem;
+    width: 100%;
   }
 `;
 
@@ -573,20 +587,29 @@ const ProjectLabel = styled.label`
   font-size: 1.4rem;
   color: rgb(var(--text));
   min-width: 12rem;
+  flex-shrink: 0;
 
   ${media('<=phone')} {
     min-width: auto;
     font-size: 1.3rem;
+    width: 100%;
+    margin-bottom: 0.3rem;
   }
 `;
 
 const ProjectValue = styled.div`
   flex: 1;
   min-width: 20rem;
+  width: 100%;
 
   ${media('<=phone')} {
     min-width: 100%;
     width: 100%;
+    flex: none;
+
+    input, select {
+      width: 100% !important;
+    }
   }
 `;
 
@@ -596,10 +619,16 @@ const CompanyInfo = styled.div`
   gap: 0.5rem;
   align-items: flex-end;
   text-align: right;
+  width: 100%;
 
   ${media('<=tablet')} {
     align-items: flex-start;
     text-align: left;
+    width: 100%;
+  }
+
+  ${media('<=phone')} {
+    gap: 0.8rem;
     width: 100%;
   }
 `;
@@ -610,6 +639,16 @@ const CompanyName = styled.div`
   color: rgb(var(--text));
   margin-bottom: 0.5rem;
   width: 100%;
+
+  ${media('<=phone')} {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+    width: 100%;
+
+    select, input {
+      width: 100% !important;
+    }
+  }
 `;
 
 const CompanyDetail = styled.div`
@@ -623,6 +662,7 @@ const CompanyDetail = styled.div`
     flex-direction: column;
     align-items: stretch;
     gap: 0.8rem;
+    width: 100%;
   }
 
   input {
@@ -634,6 +674,7 @@ const CompanyDetail = styled.div`
       width: 100% !important;
       flex: none !important;
       display: block;
+      box-sizing: border-box;
     }
   }
 
@@ -641,12 +682,13 @@ const CompanyDetail = styled.div`
     min-width: 8rem;
     font-size: 1.4rem;
     margin-bottom: 0;
+    flex-shrink: 0;
 
     ${media('<=phone')} {
       min-width: auto;
       width: 100%;
       font-size: 1.3rem;
-      margin-bottom: 0;
+      margin-bottom: 0.3rem;
       order: -1;
       display: block;
     }
@@ -668,6 +710,7 @@ const PhoneInputsWrapper = styled.div`
       width: 100% !important;
       min-width: 100% !important;
       flex: none !important;
+      box-sizing: border-box;
     }
   }
 `;
@@ -805,6 +848,13 @@ const StyledInput = styled(Input)`
   border: 2px solid rgba(var(--text), 0.25);
   border-radius: 0.5rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    padding: 0.9rem 1rem;
+  }
 
   &:focus {
     outline: none;
@@ -845,6 +895,13 @@ const SelectInput = styled.select`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   color: rgb(var(--text));
   transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+
+  ${media('<=phone')} {
+    font-size: 1.3rem;
+    padding: 0.9rem 1rem;
+  }
 
   &:focus {
     outline: none;
