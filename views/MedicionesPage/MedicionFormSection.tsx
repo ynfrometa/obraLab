@@ -36,7 +36,22 @@ export default function MedicionFormSection() {
   const [obrasList, setObrasList] = useState<any[]>([]);
   const [empresasList, setEmpresasList] = useState<any[]>([]);
   const [constructorasList, setConstructorasList] = useState<any[]>([]);
-  const [conceptos, setConceptos] = useState<ConceptoItem[]>([]);
+  const [actividadesList, setActividadesList] = useState<any[]>([]);
+  // Función auxiliar para crear un concepto vacío
+  const crearConceptoVacio = (): ConceptoItem => ({
+    actividad: '',
+    concepto: '',
+    largo: '',
+    alto: '',
+    cantidad: '1',
+    total: '0',
+    observaciones: '',
+  });
+
+  // Inicializar con 10 filas por defecto
+  const [conceptos, setConceptos] = useState<ConceptoItem[]>(() => 
+    Array(10).fill(null).map(() => crearConceptoVacio())
+  );
   const { register, handleSubmit, formState, reset, watch, setValue } = useForm<MedicionPayload>();
   const { isSubmitting, errors } = formState;
 
@@ -102,16 +117,29 @@ export default function MedicionFormSection() {
     loadConstructoras();
   }, []);
 
-  const agregarConcepto = () => {
-    const nuevoConcepto: ConceptoItem = {
-      actividad: '',
-      concepto: '',
-      largo: '',
-      alto: '',
-      cantidad: '1',
-      total: '0',
-      observaciones: '',
+  // Cargar lista de actividades para el selector
+  useEffect(() => {
+    const loadActividades = async () => {
+      if (!database) return;
+      try {
+        const actividadesCollection = collection(database, 'actividades');
+        const actividadesQuery = query(actividadesCollection, orderBy('descripcion', 'asc'));
+        const snapshot = await getDocs(actividadesQuery);
+        const actividades = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setActividadesList(actividades);
+      } catch (error) {
+        console.error('Error al cargar actividades:', error);
+      }
     };
+
+    loadActividades();
+  }, []);
+
+  const agregarConcepto = () => {
+    const nuevoConcepto = crearConceptoVacio();
     setConceptos([...conceptos, nuevoConcepto]);
   };
 
@@ -143,15 +171,22 @@ export default function MedicionFormSection() {
       setHasErrored(false);
       setErrorMessage('');
       
-      // Validar que haya al menos un concepto
-      if (conceptos.length === 0) {
-        setErrorMessage('Debes agregar al menos un concepto');
+      // Filtrar conceptos vacíos (solo los que tienen al menos concepto, largo o alto)
+      const conceptosConDatos = conceptos.filter(c => 
+        (c.concepto && c.concepto.trim() !== '') || 
+        (c.largo && c.largo.trim() !== '') || 
+        (c.alto && c.alto.trim() !== '')
+      );
+      
+      // Validar que haya al menos un concepto con datos
+      if (conceptosConDatos.length === 0) {
+        setErrorMessage('Debes agregar al menos un concepto con datos');
         setHasErrored(true);
         return;
       }
 
-      // Validar que todos los conceptos tengan los campos requeridos
-      const conceptosInvalidos = conceptos.some(c => !c.concepto || !c.largo || !c.alto);
+      // Validar que todos los conceptos con datos tengan los campos requeridos
+      const conceptosInvalidos = conceptosConDatos.some(c => !c.concepto || !c.largo || !c.alto);
       if (conceptosInvalidos) {
         setErrorMessage('Todos los conceptos deben tener concepto, L y H');
         setHasErrored(true);
@@ -160,7 +195,7 @@ export default function MedicionFormSection() {
       
       console.log('=== INICIANDO GUARDADO DE MEDICIÓN ===');
       console.log('Datos del formulario:', payload);
-      console.log('Conceptos:', conceptos);
+      console.log('Conceptos con datos:', conceptosConDatos);
       
       // Verificar que database esté inicializado
       if (!database) {
@@ -178,7 +213,7 @@ export default function MedicionFormSection() {
         constructora: payload.constructora,
         obra: payload.obra,
         fecha: payload.fecha,
-        conceptos: conceptos,
+        conceptos: conceptosConDatos,
         // Mantener compatibilidad con estructura anterior
         empresa: payload.empresaNombre,
         fechaCreacion: new Date().getTime(),
@@ -199,7 +234,8 @@ export default function MedicionFormSection() {
       console.log('Datos guardados:', newMedicion);
       
       setHasSuccessfullyAdded(true);
-      setConceptos([]);
+      // Reinicializar con 10 filas por defecto
+      setConceptos(Array(10).fill(null).map(() => crearConceptoVacio()));
       reset();
       
       // Resetear el mensaje de éxito después de 3 segundos
@@ -334,9 +370,11 @@ export default function MedicionFormSection() {
                   <SelectInput
                     id="empresaNombre"
                     disabled={isDisabled}
-                    {...register('empresaNombre', { required: true })}
+                    {...register('empresaNombre', { required: 'El nombre es requerido' })}
                     onChange={(e) => {
-                      const empresaSeleccionada = empresasList.find(emp => emp.nombre === e.target.value);
+                      const valor = e.target.value;
+                      setValue('empresaNombre', valor, { shouldValidate: true });
+                      const empresaSeleccionada = empresasList.find(emp => emp.nombre === valor);
                       if (empresaSeleccionada) {
                         setValue('empresaEmail', empresaSeleccionada.email || '');
                         setValue('empresaTelefono1', empresaSeleccionada.telefono || empresaSeleccionada.telefono1 || '');
@@ -360,7 +398,7 @@ export default function MedicionFormSection() {
                     placeholder="Nombre empresa *"
                     id="empresaNombre"
                     disabled={isDisabled}
-                    {...register('empresaNombre', { required: true })}
+                    {...register('empresaNombre', { required: 'El nombre es requerido' })}
                   />
                 )}
               </CompanyName>
@@ -405,50 +443,69 @@ export default function MedicionFormSection() {
             </AddButton>
           </ConceptosHeader>
 
-          {conceptos.length === 0 && (
-            <EmptyState>
-              No hay mediciones agregadas. Haz clic en "Agregar Fila" para comenzar.
-            </EmptyState>
-          )}
-
           {conceptos.length > 0 && (
             <TableContainer>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHeaderCell style={{ width: '15%' }}>Actividad</TableHeaderCell>
+                    <TableHeaderCellActividad>Actividad</TableHeaderCellActividad>
                     <TableHeaderCell style={{ width: '35%' }}>Concepto</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%' }}>L</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%' }}>H</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%' }}>N</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '15%' }}>Total</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '5%' }}></TableHeaderCell>
+                    <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>L</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>H</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>N</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '1.125%', textAlign: 'right' }}>Total</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '1%', padding: '0.5rem' }}></TableHeaderCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {conceptos.map((concepto, index) => (
                     <TableRow key={index}>
-                      <TableCell>
-                        <TableInput
-                          type="text"
-                          placeholder="Actividad"
-                          disabled={isDisabled}
-                          value={concepto.actividad}
-                          onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
-                        />
+                      <TableCell style={{ whiteSpace: 'nowrap' }}>
+                        {actividadesList.length > 0 ? (
+                          <TableSelect
+                            disabled={isDisabled}
+                            value={concepto.actividad}
+                            onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
+                          >
+                            <option value="">Actividades</option>
+                            {actividadesList.map((actividad) => (
+                              <option key={actividad.id} value={actividad.descripcion}>
+                                {actividad.descripcion}
+                              </option>
+                            ))}
+                          </TableSelect>
+                        ) : (
+                          <TableInput
+                            type="text"
+                            placeholder="Actividad"
+                            disabled={isDisabled}
+                            value={concepto.actividad}
+                            onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
+                          />
+                        )}
                       </TableCell>
                       <TableCell>
-                        <TableInput
-                          type="text"
+                        <TableTextarea
                           placeholder="Concepto *"
                           disabled={isDisabled}
                           value={concepto.concepto}
-                          onChange={(e) => actualizarConcepto(index, 'concepto', e.target.value)}
+                          onChange={(e) => {
+                            actualizarConcepto(index, 'concepto', e.target.value);
+                            // Auto-resize textarea
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                          }}
+                          onInput={(e) => {
+                            // Auto-resize on input
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                          }}
+                          rows={1}
                           required
                         />
                       </TableCell>
-                      <TableCell>
-                        <TableInput
+                      <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                        <TableInputNumber
                           type="number"
                           step="0.01"
                           placeholder="L"
@@ -458,8 +515,8 @@ export default function MedicionFormSection() {
                           required
                         />
                       </TableCell>
-                      <TableCell>
-                        <TableInput
+                      <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                        <TableInputNumber
                           type="number"
                           step="0.01"
                           placeholder="H"
@@ -469,15 +526,17 @@ export default function MedicionFormSection() {
                           required
                         />
                       </TableCell>
-                      <TableCell>
-                        <TableInput
-                          type="number"
-                          step="0.01"
-                          placeholder="N"
-                          disabled={isDisabled}
-                          value={concepto.cantidad}
-                          onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
-                        />
+                      <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                        <TotalCell style={{ textAlign: 'center' }}>
+                          <TableInputNumber
+                            type="number"
+                            step="0.01"
+                            placeholder="N"
+                            disabled={isDisabled}
+                            value={concepto.cantidad}
+                            onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
+                          />
+                        </TotalCell>
                       </TableCell>
                       <TableCell>
                         <TotalCell>{concepto.total || '0.00'}</TotalCell>
@@ -1008,6 +1067,7 @@ const Table = styled.table`
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
   min-width: 600px;
+  table-layout: auto;
 
   ${media('<=phone')} {
     min-width: 500px;
@@ -1045,10 +1105,16 @@ const TableHeaderCell = styled.th`
   }
 `;
 
+const TableHeaderCellActividad = styled(TableHeaderCell)`
+  width: 5.48%;
+  white-space: nowrap;
+`;
+
 const TableCell = styled.td`
   padding: 0.5rem;
   border: 1px solid rgba(var(--text), 0.2);
   vertical-align: middle;
+  white-space: nowrap;
 
   ${media('<=phone')} {
     padding: 0.4rem 0.3rem;
@@ -1057,12 +1123,76 @@ const TableCell = styled.td`
 
 const TableInput = styled.input`
   width: 100%;
+  min-width: 3rem;
   padding: 0.8rem;
   border: 1px solid rgba(var(--text), 0.2);
   border-radius: 0.3rem;
   font-size: 1.3rem;
   background: transparent;
   transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+    min-width: 2.5rem;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const TableTextarea = styled.textarea`
+  width: 100%;
+  min-width: 3rem;
+  min-height: 3.5rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.3rem;
+  background: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  overflow: hidden;
+
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+    min-width: 2.5rem;
+    min-height: 3rem;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const TableSelect = styled.select`
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.3rem;
+  background: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
 
   ${media('<=phone')} {
     padding: 0.6rem;
@@ -1078,6 +1208,45 @@ const TableInput = styled.input`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+`;
+
+const TableInputNumber = styled.input`
+  width: 100%;
+  min-width: 4rem;
+  padding: 0.5rem 0.3rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: rgb(var(--text));
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  text-align: center;
+
+  ${media('<=phone')} {
+    font-size: 1.1rem;
+    padding: 0.4rem 0.25rem;
+    min-width: 3rem;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(var(--text), 0.05);
+  }
+
+  &::placeholder {
+    color: rgba(var(--text), 0.4);
+    font-weight: normal;
+    font-size: 1.1rem;
   }
 `;
 

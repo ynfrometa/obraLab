@@ -48,6 +48,7 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
   const [obrasList, setObrasList] = useState<any[]>([]);
   const [empresasList, setEmpresasList] = useState<any[]>([]);
   const [constructorasList, setConstructorasList] = useState<any[]>([]);
+  const [actividadesList, setActividadesList] = useState<any[]>([]);
   const [conceptos, setConceptos] = useState<ConceptoItem[]>(() => {
     // Si tiene conceptos (nueva estructura), usarlos
     if (medicion.conceptos && medicion.conceptos.length > 0) {
@@ -141,6 +142,26 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       }
     };
     loadConstructoras();
+  }, []);
+
+  // Cargar lista de actividades para el selector
+  useEffect(() => {
+    const loadActividades = async () => {
+      if (!database) return;
+      try {
+        const actividadesCollection = collection(database, 'actividades');
+        const actividadesQuery = query(actividadesCollection, orderBy('descripcion', 'asc'));
+        const snapshot = await getDocs(actividadesQuery);
+        const actividades = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setActividadesList(actividades);
+      } catch (error) {
+        console.error('Error al cargar actividades:', error);
+      }
+    };
+    loadActividades();
   }, []);
 
   const agregarConcepto = () => {
@@ -365,68 +386,99 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell style={{ width: '15%' }}>Actividad</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '35%' }}>Concepto</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '10%' }}>L</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '10%' }}>H</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '10%' }}>N</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '15%' }}>Total</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '5%' }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '12%' }}>Actividad</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto' }}>Concepto</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>L</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>H</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>N</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '3.75%' }}>Total</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '4.5%' }}></TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {conceptos.map((concepto, index) => (
                   <TableRow key={index}>
+                      <TableCell>
+                        {actividadesList.length > 0 ? (
+                          <TableSelect
+                            disabled={isSubmitting}
+                            value={concepto.actividad}
+                            onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
+                          >
+                            <option value="">Actividades</option>
+                            {actividadesList.map((actividad) => (
+                              <option key={actividad.id} value={actividad.descripcion}>
+                                {actividad.descripcion}
+                              </option>
+                            ))}
+                          </TableSelect>
+                        ) : (
+                          <TableInput
+                            type="text"
+                            placeholder="Actividad"
+                            disabled={isSubmitting}
+                            value={concepto.actividad}
+                            onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
+                          />
+                        )}
+                      </TableCell>
                     <TableCell>
-                      <TableInput
-                        type="text"
-                        placeholder="Actividad"
-                        disabled={isSubmitting}
-                        value={concepto.actividad}
-                        onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <TableInput
-                        type="text"
+                      <TableTextarea
                         placeholder="Concepto *"
                         disabled={isSubmitting}
                         value={concepto.concepto}
-                        onChange={(e) => actualizarConcepto(index, 'concepto', e.target.value)}
+                        onChange={(e) => {
+                          actualizarConcepto(index, 'concepto', e.target.value);
+                          // Auto-resize textarea
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        onInput={(e) => {
+                          // Auto-resize on input
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        rows={1}
                         required
                       />
                     </TableCell>
-                    <TableCell>
-                      <TableInput
-                        type="number"
-                        step="0.01"
-                        placeholder="L"
-                        disabled={isSubmitting}
-                        value={concepto.largo}
-                        onChange={(e) => actualizarConcepto(index, 'largo', e.target.value)}
-                        required
-                      />
+                    <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                      <TotalCell style={{ textAlign: 'center' }}>
+                        <TableInputNumber
+                          type="number"
+                          step="0.01"
+                          placeholder="L"
+                          disabled={isSubmitting}
+                          value={concepto.largo}
+                          onChange={(e) => actualizarConcepto(index, 'largo', e.target.value)}
+                          required
+                        />
+                      </TotalCell>
                     </TableCell>
-                    <TableCell>
-                      <TableInput
-                        type="number"
-                        step="0.01"
-                        placeholder="H"
-                        disabled={isSubmitting}
-                        value={concepto.alto}
-                        onChange={(e) => actualizarConcepto(index, 'alto', e.target.value)}
-                        required
-                      />
+                    <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                      <TotalCell style={{ textAlign: 'center' }}>
+                        <TableInputNumber
+                          type="number"
+                          step="0.01"
+                          placeholder="H"
+                          disabled={isSubmitting}
+                          value={concepto.alto}
+                          onChange={(e) => actualizarConcepto(index, 'alto', e.target.value)}
+                          required
+                        />
+                      </TotalCell>
                     </TableCell>
-                    <TableCell>
-                      <TableInput
-                        type="number"
-                        step="0.01"
-                        placeholder="N"
-                        disabled={isSubmitting}
-                        value={concepto.cantidad}
-                        onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
-                      />
+                    <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>
+                      <TotalCell style={{ textAlign: 'center' }}>
+                        <TableInputNumber
+                          type="number"
+                          step="0.01"
+                          placeholder="N"
+                          disabled={isSubmitting}
+                          value={concepto.cantidad}
+                          onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
+                        />
+                      </TotalCell>
                     </TableCell>
                     <TableCell>
                       <TotalCell>{concepto.total || '0.00'}</TotalCell>
@@ -992,7 +1044,7 @@ const Table = styled.table`
   border-collapse: collapse;
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
-  table-layout: fixed;
+  table-layout: auto;
   min-width: 600px;
 
   ${media('<=phone')} {
@@ -1026,10 +1078,16 @@ const TableHeaderCell = styled.th`
   background: rgba(var(--primary), 0.1);
 `;
 
+const TableHeaderCellActividad = styled(TableHeaderCell)`
+  width: 1%;
+  white-space: nowrap;
+`;
+
 const TableCell = styled.td`
   padding: 0.5rem;
   border: 1px solid rgba(var(--text), 0.2);
   vertical-align: middle;
+  white-space: nowrap;
 `;
 
 const TableInput = styled.input`
@@ -1041,6 +1099,11 @@ const TableInput = styled.input`
   background: transparent;
   transition: border-color 0.2s;
 
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+  }
+
   &:focus {
     outline: none;
     border-color: rgb(var(--primary));
@@ -1050,6 +1113,101 @@ const TableInput = styled.input`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+`;
+
+const TableTextarea = styled.textarea`
+  width: 100%;
+  min-width: 3rem;
+  min-height: 3.5rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.3rem;
+  background: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  overflow: hidden;
+
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+    min-width: 2.5rem;
+    min-height: 3rem;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const TableSelect = styled.select`
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.3rem;
+  background: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+
+  ${media('<=phone')} {
+    padding: 0.6rem;
+    font-size: 1.2rem;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const TableInputNumber = styled.input`
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: rgb(var(--primary));
+  background: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  text-align: center;
+
+  ${media('<=phone')} {
+    font-size: 1.2rem;
+  }
+
+  &:focus {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: rgba(var(--text), 0.4);
+    font-weight: normal;
   }
 `;
 

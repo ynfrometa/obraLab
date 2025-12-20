@@ -217,9 +217,9 @@ export default function MedicionesListSection() {
         {mediciones.map((medicion) => (
           <MedicionCard key={medicion.id}>
             <CardHeader>
+              <HeaderTitle>HOJA DE MEDICIONES</HeaderTitle>
               <HeaderContent>
                 <HeaderLeft>
-                  <HeaderTitle>HOJA DE MEDICIONES</HeaderTitle>
                   <ProjectInfo>
                     <ProjectRow>
                       <ProjectLabel>Constructora:</ProjectLabel>
@@ -231,13 +231,29 @@ export default function MedicionesListSection() {
                     </ProjectRow>
                     <ProjectRow>
                       <ProjectLabel>Fecha:</ProjectLabel>
-                      <ProjectValue>{medicion.fecha ? new Date(medicion.fecha).toLocaleDateString('es-ES') : 'N/A'}</ProjectValue>
+                      <ProjectValue>
+                        {medicion.fecha 
+                          ? (() => {
+                              const fecha = new Date(medicion.fecha + 'T00:00:00');
+                              const day = String(fecha.getDate()).padStart(2, '0');
+                              const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                              const year = fecha.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            })()
+                          : 'N/A'}
+                      </ProjectValue>
                     </ProjectRow>
                   </ProjectInfo>
                 </HeaderLeft>
                 <HeaderRight>
                   <CompanyInfo>
-                    <CompanyName>{medicion.empresaNombre || medicion.empresa}</CompanyName>
+                    <CompanyNameWrapper>
+                      <CompanyName>{medicion.empresaNombre || medicion.empresa}</CompanyName>
+                      <ButtonGroup>
+                        <EditButton onClick={() => handleEdit(medicion)}>✏️</EditButton>
+                        <DeleteButton onClick={() => handleDelete(medicion.id)}>×</DeleteButton>
+                      </ButtonGroup>
+                    </CompanyNameWrapper>
                     {medicion.empresaEmail && (
                       <CompanyDetail>Email: {medicion.empresaEmail}</CompanyDetail>
                     )}
@@ -248,10 +264,6 @@ export default function MedicionesListSection() {
                     )}
                   </CompanyInfo>
                 </HeaderRight>
-                <ButtonGroup>
-                  <EditButton onClick={() => handleEdit(medicion)}>✏️</EditButton>
-                  <DeleteButton onClick={() => handleDelete(medicion.id)}>×</DeleteButton>
-                </ButtonGroup>
               </HeaderContent>
             </CardHeader>
             <CardContent>
@@ -260,23 +272,23 @@ export default function MedicionesListSection() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell>Actividad</TableHeaderCell>
-                        <TableHeaderCell>Concepto</TableHeaderCell>
-                        <TableHeaderCell>L</TableHeaderCell>
-                        <TableHeaderCell>H</TableHeaderCell>
-                        <TableHeaderCell>N</TableHeaderCell>
-                        <TableHeaderCell>Total</TableHeaderCell>
+                        <TableHeaderCellActividad>Actividad</TableHeaderCellActividad>
+                        <TableHeaderCell style={{ width: '35%' }}>Concepto</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>L</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>H</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>N</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '1.125%', textAlign: 'right' }}>Total</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {medicion.conceptos.map((concepto, idx) => (
                         <TableRow key={idx}>
-                          <TableCell>{concepto.actividad || ''}</TableCell>
+                          <TableCell style={{ whiteSpace: 'nowrap' }}>{concepto.actividad || ''}</TableCell>
                           <TableCell>{concepto.concepto}</TableCell>
-                          <TableCell>{concepto.largo}</TableCell>
-                          <TableCell>{concepto.alto}</TableCell>
-                          <TableCell>{concepto.cantidad || '1'}</TableCell>
-                          <TableCell>
+                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.largo}</TableCell>
+                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.alto}</TableCell>
+                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.cantidad || '1'}</TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>
                             <TotalValue>{concepto.total || '0.00'}</TotalValue>
                           </TableCell>
                         </TableRow>
@@ -332,7 +344,7 @@ const MedicionCard = styled.div`
 
 const CardHeader = styled.div`
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
   border-bottom: 2px solid rgba(var(--text), 0.1);
 `;
 
@@ -378,7 +390,7 @@ const HeaderTitle = styled.h3`
   font-size: 1.9rem;
   font-weight: 700;
   color: rgb(var(--primary));
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 `;
@@ -448,11 +460,17 @@ const CompanyInfo = styled.div`
   }
 `;
 
+const CompanyNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+`;
+
 const CompanyName = styled.div`
   font-weight: bold;
   font-size: 1.6rem;
   color: rgb(var(--text));
-  margin-bottom: 0.3rem;
 `;
 
 const CompanyDetail = styled.div`
@@ -465,6 +483,7 @@ const ButtonGroup = styled.div`
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
+  align-items: center;
 `;
 
 const EditButton = styled.button`
@@ -472,17 +491,19 @@ const EditButton = styled.button`
   color: white;
   border: none;
   border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  font-size: 1.6rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.4rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: transform 0.2s, opacity 0.2s;
+  padding: 0;
 
   &:hover {
     transform: scale(1.1);
+    opacity: 0.9;
   }
 `;
 
@@ -491,17 +512,20 @@ const DeleteButton = styled.button`
   color: white;
   border: none;
   border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  font-size: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: transform 0.2s, opacity 0.2s;
+  padding: 0;
+  line-height: 1;
 
   &:hover {
     transform: scale(1.1);
+    opacity: 0.9;
   }
 `;
 
@@ -530,6 +554,7 @@ const Table = styled.table`
   background: white;
   border: 2px solid rgba(var(--text), 0.2);
   min-width: 600px;
+  table-layout: auto;
 
   ${media('<=phone')} {
     min-width: 500px;
@@ -565,6 +590,11 @@ const TableHeaderCell = styled.th`
     padding: 0.8rem 0.5rem;
     font-size: 1.2rem;
   }
+`;
+
+const TableHeaderCellActividad = styled(TableHeaderCell)`
+  width: 1%;
+  white-space: nowrap;
 `;
 
 const TableCell = styled.td`
