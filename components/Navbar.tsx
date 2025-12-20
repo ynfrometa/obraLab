@@ -1,11 +1,11 @@
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNewsletterModalContext } from 'contexts/newsletter-modal.context';
 import { ScrollPositionEffectProps, useScrollPosition } from 'hooks/useScrollPosition';
-import { NavItems, SingleNavItem } from 'types';
+import { type NavGroup, NavItems, SingleNavItem } from 'types';
 import { media } from 'utils/media';
 import Button from './Button';
 import Container from './Container';
@@ -73,9 +73,12 @@ export default function Navbar({ items }: NavbarProps) {
           </LogoWrapper>
         </NextLink>
         <NavItemList>
-          {items.map((singleItem) => (
-            <NavItem key={singleItem.href} {...singleItem} />
-          ))}
+          {items.map((item, index) => {
+            if ('items' in item) {
+              return <NavGroupComponent key={index} group={item} />;
+            }
+            return <NavItem key={item.href} {...item} />;
+          })}
         </NavItemList>
         <ColorSwitcherContainer>
           <ColorSwitcher />
@@ -87,6 +90,75 @@ export default function Navbar({ items }: NavbarProps) {
     </NavbarContainer>
   );
 }
+
+const DropdownContainer = styled.div`
+  position: relative;
+  margin-right: 2rem;
+`;
+
+const DropdownButton = styled.button<{ isOpen: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: rgb(var(--text), 0.75);
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background-color: rgba(var(--primary), 0.1);
+    color: rgb(var(--text));
+  }
+`;
+
+const DropdownArrow = styled.span`
+  font-size: 0.8rem;
+  transition: transform 0.2s;
+`;
+
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: rgb(var(--cardBackground));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 15rem;
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid rgba(var(--text), 0.1);
+`;
+
+const DropdownItem = styled.div`
+  a {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: rgb(var(--text), 0.75);
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+      background-color: rgba(var(--primary), 0.1);
+      color: rgb(var(--text));
+    }
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(var(--text), 0.1);
+  }
+`;
 
 function NavItem({ href, title, outlined }: SingleNavItem) {
   const { setIsModalOpened } = useNewsletterModalContext();
@@ -105,6 +177,58 @@ function NavItem({ href, title, outlined }: SingleNavItem) {
         <a>{title}</a>
       </NextLink>
     </NavItemWrapper>
+  );
+}
+
+function NavGroupComponent({ group }: { group: NavGroup }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar dropdown cuando se cambia de ruta
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsOpen(false);
+    };
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router]);
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen]);
+
+  return (
+    <DropdownContainer ref={dropdownRef}>
+      <DropdownButton onClick={() => setIsOpen(!isOpen)} isOpen={isOpen}>
+        {group.title}
+        <DropdownArrow>▼</DropdownArrow>
+      </DropdownButton>
+      {isOpen && (
+        <DropdownMenu>
+          {group.items.map((item) => (
+            <DropdownItem key={item.href}>
+              <NextLink href={item.href} passHref>
+                <a>{item.title}</a>
+              </NextLink>
+            </DropdownItem>
+          ))}
+        </DropdownMenu>
+      )}
+    </DropdownContainer>
   );
 }
 

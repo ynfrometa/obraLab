@@ -1,6 +1,6 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { PropsWithChildren, useEffect, useRef } from 'react'
+import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { NavItems } from 'types'
 import ClientOnly from './ClientOnly'
@@ -32,6 +32,7 @@ export default function NavigationDrawer({ children, items }: NavigationDrawerPr
 function NavItemsList({ items }: NavigationDrawerProps) {
   const { close } = OriginalDrawer.useDrawer()
   const router = useRouter()
+  const [openGroups, setOpenGroups] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     function handleRouteChangeComplete() {
@@ -42,12 +43,42 @@ function NavItemsList({ items }: NavigationDrawerProps) {
     return () => router.events.off('routeChangeComplete', handleRouteChangeComplete)
   }, [close, router])
 
+  const toggleGroup = (index: number) => {
+    const newOpenGroups = new Set(openGroups)
+    if (newOpenGroups.has(index)) {
+      newOpenGroups.delete(index)
+    } else {
+      newOpenGroups.add(index)
+    }
+    setOpenGroups(newOpenGroups)
+  }
+
   return (
     <ul>
-      {items.map((singleItem, idx) => {
+      {items.map((item, idx) => {
+        if ('items' in item) {
+          const isOpen = openGroups.has(idx)
+          return (
+            <NavGroupItem key={idx}>
+              <GroupHeader onClick={() => toggleGroup(idx)}>
+                {item.title}
+                <GroupArrow isOpen={isOpen}>▼</GroupArrow>
+              </GroupHeader>
+              {isOpen && (
+                <GroupItems>
+                  {item.items.map((subItem, subIdx) => (
+                    <NavItem key={subIdx}>
+                      <NextLink href={subItem.href}>{subItem.title}</NextLink>
+                    </NavItem>
+                  ))}
+                </GroupItems>
+              )}
+            </NavGroupItem>
+          )
+        }
         return (
           <NavItem key={idx}>
-            <NextLink href={singleItem.href}>{singleItem.title}</NextLink>
+            <NextLink href={item.href}>{item.title}</NextLink>
           </NavItem>
         )
       })}
@@ -120,5 +151,58 @@ const NavItem = styled.li`
     border-radius: 0.5rem;
     padding: 0.5rem 1rem;
     text-align: center;
+  }
+`
+
+const NavGroupItem = styled.li`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
+const GroupHeader = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: transparent;
+  border: none;
+  color: currentColor;
+  font-size: 3rem;
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  width: 100%;
+  justify-content: center;
+
+  &:hover {
+    background-color: rgba(var(--primary), 0.1);
+  }
+`
+
+const GroupArrow = styled.span<{ isOpen: boolean }>`
+  font-size: 1.5rem;
+  transition: transform 0.2s;
+  transform: ${(p) => (p.isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
+`
+
+const GroupItems = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & > *:not(:last-child) {
+    margin-bottom: 1.5rem;
+  }
+
+  li a {
+    font-size: 2rem;
+    opacity: 0.9;
   }
 `

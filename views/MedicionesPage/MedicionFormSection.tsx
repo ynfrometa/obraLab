@@ -492,13 +492,15 @@ export default function MedicionFormSection() {
                           onChange={(e) => {
                             actualizarConcepto(index, 'concepto', e.target.value);
                             // Auto-resize textarea
-                            e.target.style.height = 'auto';
-                            e.target.style.height = e.target.scrollHeight + 'px';
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = 'auto';
+                            target.style.height = target.scrollHeight + 'px';
                           }}
                           onInput={(e) => {
                             // Auto-resize on input
-                            e.target.style.height = 'auto';
-                            e.target.style.height = e.target.scrollHeight + 'px';
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = 'auto';
+                            target.style.height = target.scrollHeight + 'px';
                           }}
                           rows={1}
                           required
