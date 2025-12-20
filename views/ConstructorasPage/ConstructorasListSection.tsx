@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import SectionTitle from 'components/SectionTitle';
-import AutofitGrid from 'components/AutofitGrid';
 import { media } from 'utils/media';
 import { database } from 'lib/firebase';
 import type { Firestore } from 'firebase/firestore';
@@ -160,40 +159,56 @@ export default function ConstructorasListSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Lista de Constructoras ({constructoras.length})</SectionTitle>
-      <AutofitGrid>
+      <SectionTitle>Lista de Constructoras</SectionTitle>
+      <ConstructorasGrid>
         {constructoras.map((constructora) => (
           <ConstructoraCard key={constructora.id}>
             <CardHeader>
-              <ConstructoraName>{constructora.nombre}</ConstructoraName>
-              <ButtonGroup>
-                <EditButton onClick={() => handleEdit(constructora)}>✏️</EditButton>
-                <DeleteButton onClick={() => handleDelete(constructora.id)}>×</DeleteButton>
-              </ButtonGroup>
+              <HeaderContent>
+                <HeaderLeft>
+                  <HeaderTitle>CONSTRUCTORA</HeaderTitle>
+                  <ProjectInfo>
+                    <ProjectRow>
+                      <ProjectLabel>Nombre:</ProjectLabel>
+                      <ProjectValue>{constructora.nombre}</ProjectValue>
+                    </ProjectRow>
+                  </ProjectInfo>
+                </HeaderLeft>
+                <ButtonGroup>
+                  <EditButton onClick={() => handleEdit(constructora)}>✏️</EditButton>
+                  <DeleteButton onClick={() => handleDelete(constructora.id)}>×</DeleteButton>
+                </ButtonGroup>
+              </HeaderContent>
             </CardHeader>
             <CardContent>
-              {constructora.direccion && (
-                <InfoRow>
-                  <Label>Dirección:</Label>
-                  <Value>{constructora.direccion}</Value>
-                </InfoRow>
-              )}
-              {constructora.telefono && (
-                <InfoRow>
-                  <Label>Teléfono:</Label>
-                  <Value>{constructora.telefono}</Value>
-                </InfoRow>
-              )}
-              {constructora.email && (
-                <InfoRow>
-                  <Label>Email:</Label>
-                  <Value>{constructora.email}</Value>
-                </InfoRow>
-              )}
+              <TableContainer>
+                <Table>
+                  <TableBody>
+                    {constructora.direccion && (
+                      <TableRow>
+                        <TableCell><Label>Dirección:</Label></TableCell>
+                        <TableCell>{constructora.direccion}</TableCell>
+                      </TableRow>
+                    )}
+                    {constructora.telefono && (
+                      <TableRow>
+                        <TableCell><Label>Teléfono:</Label></TableCell>
+                        <TableCell>{constructora.telefono}</TableCell>
+                      </TableRow>
+                    )}
+                    {constructora.email && (
+                      <TableRow>
+                        <TableCell><Label>Email:</Label></TableCell>
+                        <TableCell>{constructora.email}</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </ConstructoraCard>
         ))}
-      </AutofitGrid>
+      </ConstructorasGrid>
       {currentConstructora && (
         <EditModal isOpen={isEditModalOpen} onClose={handleCloseModal} title={`Editar Constructora: ${currentConstructora.nombre}`}>
           <EditConstructoraForm constructora={currentConstructora} onClose={handleCloseModal} />
@@ -207,40 +222,96 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
+const ConstructorasGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const ConstructoraCard = styled.div`
-  padding: 2.5rem;
+  padding: 2rem;
   background: rgb(var(--cardBackground));
   box-shadow: var(--shadow-md);
   border-radius: 0.6rem;
   color: rgb(var(--text));
   font-size: 1.6rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid rgba(var(--text), 0.1);
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
 `;
 
 const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(var(--text), 0.1);
+  border-bottom: 2px solid rgba(var(--text), 0.1);
 `;
 
-const ConstructoraName = styled.h3`
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0;
+const HeaderContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+`;
+
+const HeaderLeft = styled.div`
+  flex: 1;
+`;
+
+const HeaderTitle = styled.h3`
+  font-size: 1.9rem;
+  font-weight: 700;
   color: rgb(var(--primary));
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+`;
+
+const ProjectInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+`;
+
+const ProjectRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const ProjectLabel = styled.span`
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: rgb(var(--text));
+  min-width: 12rem;
+  letter-spacing: 0.01em;
+`;
+
+const ProjectValue = styled.span`
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: rgb(var(--text));
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
 `;
 
 const EditButton = styled.button`
@@ -285,23 +356,54 @@ const CardContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 1rem;
 `;
 
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
+const TableContainer = styled.div`
+  overflow-x: auto;
+  margin-top: 1rem;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 2px solid rgba(var(--text), 0.2);
+`;
+
+const TableBody = styled.tbody``;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background: rgba(var(--text), 0.02);
+  }
+  &:hover {
+    background: rgba(var(--primary), 0.05);
+  }
+`;
+
+const TableCell = styled.td`
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  vertical-align: middle;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+
+  &:first-child {
+    font-weight: 600;
+    min-width: 15rem;
+    background: rgba(var(--primary), 0.05);
+  }
+
+  &:last-child {
+    font-weight: 400;
+  }
 `;
 
 const Label = styled.span`
   font-weight: bold;
-  opacity: 0.7;
-`;
-
-const Value = styled.span`
-  text-align: right;
-  opacity: 0.9;
+  color: rgb(var(--text));
 `;
 
 const EmptyState = styled.div`
@@ -311,4 +413,5 @@ const EmptyState = styled.div`
   opacity: 0.6;
   font-size: 1.8rem;
 `;
+
 

@@ -25,3 +25,4 @@ const ActividadesContainer = styled.div`
   }
 `;
 
+

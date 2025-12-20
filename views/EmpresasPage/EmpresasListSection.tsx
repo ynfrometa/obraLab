@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import SectionTitle from 'components/SectionTitle';
-import AutofitGrid from 'components/AutofitGrid';
 import { media } from 'utils/media';
 import { database } from 'lib/firebase';
 import type { Firestore } from 'firebase/firestore';
@@ -14,6 +13,7 @@ interface Empresa {
   nombre: string;
   direccion?: string;
   telefono?: string;
+  telefono2?: string;
   email?: string;
   fechaCreacion: number;
 }
@@ -52,6 +52,7 @@ export default function EmpresasListSection() {
             nombre: empresaData?.nombre || '',
             direccion: empresaData?.direccion || '',
             telefono: empresaData?.telefono || '',
+            telefono2: empresaData?.telefono2 || '',
             email: empresaData?.email || '',
             fechaCreacion: empresaData?.fechaCreacion || Date.now(),
           };
@@ -160,40 +161,58 @@ export default function EmpresasListSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Lista de Empresas ({empresas.length})</SectionTitle>
-      <AutofitGrid>
+      <SectionTitle>Lista de Empresas</SectionTitle>
+      <EmpresasGrid>
         {empresas.map((empresa) => (
           <EmpresaCard key={empresa.id}>
             <CardHeader>
-              <EmpresaName>{empresa.nombre}</EmpresaName>
-              <ButtonGroup>
-                <EditButton onClick={() => handleEdit(empresa)}>✏️</EditButton>
-                <DeleteButton onClick={() => handleDelete(empresa.id)}>×</DeleteButton>
-              </ButtonGroup>
+              <HeaderContent>
+                <HeaderLeft>
+                  <HeaderTitle>EMPRESA</HeaderTitle>
+                  <ProjectInfo>
+                    <ProjectRow>
+                      <ProjectLabel>Nombre:</ProjectLabel>
+                      <ProjectValue>{empresa.nombre}</ProjectValue>
+                    </ProjectRow>
+                  </ProjectInfo>
+                </HeaderLeft>
+                <ButtonGroup>
+                  <EditButton onClick={() => handleEdit(empresa)}>✏️</EditButton>
+                  <DeleteButton onClick={() => handleDelete(empresa.id)}>×</DeleteButton>
+                </ButtonGroup>
+              </HeaderContent>
             </CardHeader>
             <CardContent>
-              {empresa.direccion && (
-                <InfoRow>
-                  <Label>Dirección:</Label>
-                  <Value>{empresa.direccion}</Value>
-                </InfoRow>
-              )}
-              {empresa.telefono && (
-                <InfoRow>
-                  <Label>Teléfono:</Label>
-                  <Value>{empresa.telefono}</Value>
-                </InfoRow>
-              )}
-              {empresa.email && (
-                <InfoRow>
-                  <Label>Email:</Label>
-                  <Value>{empresa.email}</Value>
-                </InfoRow>
-              )}
+              <TableContainer>
+                <Table>
+                  <TableBody>
+                    {empresa.direccion && (
+                      <TableRow>
+                        <TableCell><Label>Dirección:</Label></TableCell>
+                        <TableCell>{empresa.direccion}</TableCell>
+                      </TableRow>
+                    )}
+                    {(empresa.telefono || empresa.telefono2) && (
+                      <TableRow>
+                        <TableCell><Label>Teléfonos:</Label></TableCell>
+                        <TableCell>
+                          {[empresa.telefono, empresa.telefono2].filter(Boolean).join(', ')}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {empresa.email && (
+                      <TableRow>
+                        <TableCell><Label>Email:</Label></TableCell>
+                        <TableCell>{empresa.email}</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </EmpresaCard>
         ))}
-      </AutofitGrid>
+      </EmpresasGrid>
       {currentEmpresa && (
         <EditModal isOpen={isEditModalOpen} onClose={handleCloseModal} title={`Editar Empresa: ${currentEmpresa.nombre}`}>
           <EditEmpresaForm empresa={currentEmpresa} onClose={handleCloseModal} />
@@ -207,40 +226,96 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
+const EmpresasGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const EmpresaCard = styled.div`
-  padding: 2.5rem;
+  padding: 2rem;
   background: rgb(var(--cardBackground));
   box-shadow: var(--shadow-md);
   border-radius: 0.6rem;
   color: rgb(var(--text));
   font-size: 1.6rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid rgba(var(--text), 0.1);
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
 `;
 
 const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(var(--text), 0.1);
+  border-bottom: 2px solid rgba(var(--text), 0.1);
 `;
 
-const EmpresaName = styled.h3`
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0;
+const HeaderContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+`;
+
+const HeaderLeft = styled.div`
+  flex: 1;
+`;
+
+const HeaderTitle = styled.h3`
+  font-size: 1.9rem;
+  font-weight: 700;
   color: rgb(var(--primary));
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+`;
+
+const ProjectInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+`;
+
+const ProjectRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const ProjectLabel = styled.span`
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: rgb(var(--text));
+  min-width: 12rem;
+  letter-spacing: 0.01em;
+`;
+
+const ProjectValue = styled.span`
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: rgb(var(--text));
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
 `;
 
 const EditButton = styled.button`
@@ -285,23 +360,54 @@ const CardContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 1rem;
 `;
 
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
+const TableContainer = styled.div`
+  overflow-x: auto;
+  margin-top: 1rem;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 2px solid rgba(var(--text), 0.2);
+`;
+
+const TableBody = styled.tbody``;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background: rgba(var(--text), 0.02);
+  }
+  &:hover {
+    background: rgba(var(--primary), 0.05);
+  }
+`;
+
+const TableCell = styled.td`
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  vertical-align: middle;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+
+  &:first-child {
+    font-weight: 600;
+    min-width: 15rem;
+    background: rgba(var(--primary), 0.05);
+  }
+
+  &:last-child {
+    font-weight: 400;
+  }
 `;
 
 const Label = styled.span`
   font-weight: bold;
-  opacity: 0.7;
-`;
-
-const Value = styled.span`
-  text-align: right;
-  opacity: 0.9;
+  color: rgb(var(--text));
 `;
 
 const EmptyState = styled.div`

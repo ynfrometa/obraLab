@@ -47,18 +47,21 @@ const Card = styled.div`
   position: relative;
   flex-direction: column;
   margin: auto;
-  padding: 4rem 5rem;
+  padding: 3rem 4rem;
   background: rgb(var(--modalBackground));
   border-radius: 0.6rem;
-  max-width: 80rem;
+  max-width: 95vw;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   color: rgb(var(--text));
   box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
 
   ${media('<=tablet')} {
-    padding: 3rem 2rem;
-    max-width: 95%;
+    padding: 2rem 1.5rem;
+    max-width: 98vw;
   }
 `;
 

@@ -10,6 +10,7 @@ import EditModal from 'components/EditModal';
 import EditMedicionForm from './EditMedicionForm';
 
 interface ConceptoItem {
+  actividad: string;
   concepto: string;
   largo: string;
   alto: string;
@@ -20,11 +21,16 @@ interface ConceptoItem {
 
 interface Medicion {
   id: string;
-  empresa: string;
+  empresaNombre?: string;
+  empresaEmail?: string;
+  empresaTelefono1?: string;
+  empresaTelefono2?: string;
+  constructora?: string;
   obra: string;
   fecha: string;
   conceptos?: ConceptoItem[]; // Nueva estructura con array de conceptos
   // Campos legacy para compatibilidad con datos antiguos
+  empresa?: string;
   concepto?: string;
   largo?: string;
   alto?: string;
@@ -66,11 +72,16 @@ export default function MedicionesListSection() {
           
           return {
             id: docSnapshot.id,
-            empresa: medicionData?.empresa || '',
+            empresaNombre: medicionData?.empresaNombre || medicionData?.empresa || '',
+            empresaEmail: medicionData?.empresaEmail || '',
+            empresaTelefono1: medicionData?.empresaTelefono1 || '',
+            empresaTelefono2: medicionData?.empresaTelefono2 || '',
+            constructora: medicionData?.constructora || '',
             obra: medicionData?.obra || '',
             fecha: medicionData?.fecha || '',
             conceptos: medicionData?.conceptos || undefined, // Nueva estructura
             // Campos legacy para compatibilidad
+            empresa: medicionData?.empresa || medicionData?.empresaNombre || '',
             concepto: medicionData?.concepto || undefined,
             largo: medicionData?.largo || undefined,
             alto: medicionData?.alto || undefined,
@@ -142,13 +153,19 @@ export default function MedicionesListSection() {
     
     try {
       const medicionDoc = doc(database, 'mediciones', editingMedicion.id);
-      // Si viene con conceptos, asegurarse de limpiar campos legacy
+      // Si viene con conceptos, asegurarse de incluir todos los campos nuevos
       if (updatedData.conceptos) {
         const dataToUpdate: any = {
-          empresa: updatedData.empresa,
+          empresaNombre: updatedData.empresaNombre || updatedData.empresa,
+          empresaEmail: updatedData.empresaEmail || '',
+          empresaTelefono1: updatedData.empresaTelefono1 || '',
+          empresaTelefono2: updatedData.empresaTelefono2 || '',
+          constructora: updatedData.constructora || '',
           obra: updatedData.obra,
           fecha: updatedData.fecha,
           conceptos: updatedData.conceptos,
+          // Mantener compatibilidad
+          empresa: updatedData.empresaNombre || updatedData.empresa,
         };
         await updateDoc(medicionDoc, dataToUpdate);
       } else {
@@ -182,7 +199,7 @@ export default function MedicionesListSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Lista de Hojas de Mediciones ({mediciones.length})</SectionTitle>
+      <SectionTitle>Lista de Hojas de Mediciones</SectionTitle>
       <EditModal
         isOpen={!!editingMedicion}
         onClose={handleCloseEdit}
@@ -196,117 +213,84 @@ export default function MedicionesListSection() {
           />
         )}
       </EditModal>
-      <AutofitGrid>
+      <MedicionesGrid>
         {mediciones.map((medicion) => (
           <MedicionCard key={medicion.id}>
             <CardHeader>
-              <HeaderInfo>
-                {medicion.concepto && (
-                  <HeaderItem style={{ width: '100%', marginBottom: '1rem' }}>
-                    <HeaderLabel>Concepto:</HeaderLabel>
-                    <HeaderValue>{medicion.concepto}</HeaderValue>
-                  </HeaderItem>
-                )}
-                <HeaderItem>
-                  <HeaderLabel>Empresa:</HeaderLabel>
-                  <HeaderValue>{medicion.empresa}</HeaderValue>
-                </HeaderItem>
-                <HeaderItem>
-                  <HeaderLabel>Obra:</HeaderLabel>
-                  <HeaderValue>{medicion.obra}</HeaderValue>
-                </HeaderItem>
-                <HeaderItem>
-                  <HeaderLabel>Fecha:</HeaderLabel>
-                  <HeaderValue>{medicion.fecha ? new Date(medicion.fecha).toLocaleDateString('es-ES') : 'N/A'}</HeaderValue>
-                </HeaderItem>
-              </HeaderInfo>
-              <ButtonGroup>
-                <EditButton onClick={() => handleEdit(medicion)}>✏️</EditButton>
-                <DeleteButton onClick={() => handleDelete(medicion.id)}>×</DeleteButton>
-              </ButtonGroup>
+              <HeaderContent>
+                <HeaderLeft>
+                  <HeaderTitle>HOJA DE MEDICIONES</HeaderTitle>
+                  <ProjectInfo>
+                    <ProjectRow>
+                      <ProjectLabel>Constructora:</ProjectLabel>
+                      <ProjectValue>{medicion.constructora || 'N/A'}</ProjectValue>
+                    </ProjectRow>
+                    <ProjectRow>
+                      <ProjectLabel>Obra:</ProjectLabel>
+                      <ProjectValue>{medicion.obra}</ProjectValue>
+                    </ProjectRow>
+                    <ProjectRow>
+                      <ProjectLabel>Fecha:</ProjectLabel>
+                      <ProjectValue>{medicion.fecha ? new Date(medicion.fecha).toLocaleDateString('es-ES') : 'N/A'}</ProjectValue>
+                    </ProjectRow>
+                  </ProjectInfo>
+                </HeaderLeft>
+                <HeaderRight>
+                  <CompanyInfo>
+                    <CompanyName>{medicion.empresaNombre || medicion.empresa}</CompanyName>
+                    {medicion.empresaEmail && (
+                      <CompanyDetail>Email: {medicion.empresaEmail}</CompanyDetail>
+                    )}
+                    {(medicion.empresaTelefono1 || medicion.empresaTelefono2) && (
+                      <CompanyDetail>
+                        {[medicion.empresaTelefono1, medicion.empresaTelefono2].filter(Boolean).join(', ')}
+                      </CompanyDetail>
+                    )}
+                  </CompanyInfo>
+                </HeaderRight>
+                <ButtonGroup>
+                  <EditButton onClick={() => handleEdit(medicion)}>✏️</EditButton>
+                  <DeleteButton onClick={() => handleDelete(medicion.id)}>×</DeleteButton>
+                </ButtonGroup>
+              </HeaderContent>
             </CardHeader>
             <CardContent>
               {medicion.conceptos && medicion.conceptos.length > 0 ? (
-                // Nueva estructura: mostrar lista de conceptos
-                <ConceptosList>
-                  <ConceptosTitle>Mediciones ({medicion.conceptos.length}):</ConceptosTitle>
-                  {medicion.conceptos.map((concepto, idx) => (
-                    <ConceptoItem key={idx}>
-                      <ConceptoHeader>
-                        <ConceptoLabel>Concepto #{idx + 1}: {concepto.concepto}</ConceptoLabel>
-                      </ConceptoHeader>
-                      <ConceptoDetails>
-                        <InfoRow>
-                          <Label>Largo:</Label>
-                          <Value>{concepto.largo}</Value>
-                        </InfoRow>
-                        <InfoRow>
-                          <Label>Alto:</Label>
-                          <Value>{concepto.alto}</Value>
-                        </InfoRow>
-                        <InfoRow>
-                          <Label>Cantidad:</Label>
-                          <Value>{concepto.cantidad || '1'}</Value>
-                        </InfoRow>
-                        <InfoRow>
-                          <Label>Total:</Label>
-                          <TotalValue>{concepto.total}</TotalValue>
-                        </InfoRow>
-                        {concepto.observaciones && (
-                          <InfoRow>
-                            <Label>Observaciones:</Label>
-                            <Value>{concepto.observaciones}</Value>
-                          </InfoRow>
-                        )}
-                      </ConceptoDetails>
-                    </ConceptoItem>
-                  ))}
-                </ConceptosList>
+                <TableContainer>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell>Actividad</TableHeaderCell>
+                        <TableHeaderCell>Concepto</TableHeaderCell>
+                        <TableHeaderCell>L</TableHeaderCell>
+                        <TableHeaderCell>H</TableHeaderCell>
+                        <TableHeaderCell>N</TableHeaderCell>
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {medicion.conceptos.map((concepto, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>{concepto.actividad || ''}</TableCell>
+                          <TableCell>{concepto.concepto}</TableCell>
+                          <TableCell>{concepto.largo}</TableCell>
+                          <TableCell>{concepto.alto}</TableCell>
+                          <TableCell>{concepto.cantidad || '1'}</TableCell>
+                          <TableCell>
+                            <TotalValue>{concepto.total || '0.00'}</TotalValue>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               ) : (
-                // Estructura legacy: mostrar un solo concepto
-                <>
-                  {medicion.concepto && (
-                    <InfoRow>
-                      <Label>Concepto:</Label>
-                      <Value>{medicion.concepto}</Value>
-                    </InfoRow>
-                  )}
-                  {medicion.largo && (
-                    <InfoRow>
-                      <Label>Largo:</Label>
-                      <Value>{medicion.largo}</Value>
-                    </InfoRow>
-                  )}
-                  {medicion.alto && (
-                    <InfoRow>
-                      <Label>Alto:</Label>
-                      <Value>{medicion.alto}</Value>
-                    </InfoRow>
-                  )}
-                  {medicion.cantidad && (
-                    <InfoRow>
-                      <Label>Cantidad:</Label>
-                      <Value>{medicion.cantidad}</Value>
-                    </InfoRow>
-                  )}
-                  {medicion.total && (
-                    <InfoRow>
-                      <Label>Total:</Label>
-                      <TotalValue>{medicion.total}</TotalValue>
-                    </InfoRow>
-                  )}
-                  {medicion.observaciones && (
-                    <InfoRow>
-                      <Label>Observaciones:</Label>
-                      <Value>{medicion.observaciones}</Value>
-                    </InfoRow>
-                  )}
-                </>
+                <EmptyTableMessage>No hay mediciones registradas</EmptyTableMessage>
               )}
             </CardContent>
           </MedicionCard>
         ))}
-      </AutofitGrid>
+      </MedicionesGrid>
     </Wrapper>
   );
 }
@@ -315,55 +299,127 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
+const MedicionesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const MedicionCard = styled.div`
-  padding: 2.5rem;
+  padding: 2rem;
   background: rgb(var(--cardBackground));
   box-shadow: var(--shadow-md);
   border-radius: 0.6rem;
   color: rgb(var(--text));
   font-size: 1.6rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid rgba(var(--text), 0.1);
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
 `;
 
 const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid rgba(var(--text), 0.1);
-  gap: 1rem;
 `;
 
-const HeaderInfo = styled.div`
+const HeaderContent = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+`;
+
+const HeaderLeft = styled.div`
   flex: 1;
 `;
 
-const HeaderItem = styled.div`
+const HeaderRight = styled.div`
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+  min-width: 25rem;
+
+  ${media('<=tablet')} {
+    min-width: auto;
+    width: 100%;
+    text-align: left;
+  }
 `;
 
-const HeaderLabel = styled.span`
-  font-weight: bold;
-  font-size: 1.5rem;
-  opacity: 0.7;
-  min-width: 8rem;
-`;
-
-const HeaderValue = styled.span`
-  font-size: 1.6rem;
-  font-weight: 600;
+const HeaderTitle = styled.h3`
+  font-size: 1.9rem;
+  font-weight: 700;
   color: rgb(var(--primary));
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+`;
+
+const ProjectInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+`;
+
+const ProjectRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const ProjectLabel = styled.span`
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: rgb(var(--text));
+  min-width: 12rem;
+  letter-spacing: 0.01em;
+`;
+
+const ProjectValue = styled.span`
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: rgb(var(--text));
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+`;
+
+const CompanyInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+
+  ${media('<=tablet')} {
+    align-items: flex-start;
+  }
+`;
+
+const CompanyName = styled.div`
+  font-weight: bold;
+  font-size: 1.6rem;
+  color: rgb(var(--text));
+  margin-bottom: 0.3rem;
+`;
+
+const CompanyDetail = styled.div`
+  font-size: 1.3rem;
+  color: rgb(var(--text));
+  opacity: 0.9;
 `;
 
 const ButtonGroup = styled.div`
@@ -417,32 +473,74 @@ const CardContent = styled.div`
   margin-top: 1rem;
 `;
 
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 0.5rem 0;
-  gap: 1rem;
+const TableContainer = styled.div`
+  overflow-x: auto;
+  margin-top: 1rem;
 `;
 
-const Label = styled.span`
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 2px solid rgba(var(--text), 0.2);
+`;
+
+const TableHeader = styled.thead`
+  background: rgba(var(--primary), 0.1);
+`;
+
+const TableBody = styled.tbody``;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background: rgba(var(--text), 0.02);
+  }
+  &:hover {
+    background: rgba(var(--primary), 0.05);
+  }
+`;
+
+const TableHeaderCell = styled.th`
+  padding: 1rem;
+  text-align: left;
   font-weight: bold;
-  opacity: 0.7;
-  flex-shrink: 0;
-  min-width: 12rem;
+  font-size: 1.4rem;
+  color: rgb(var(--text));
+  border: 1px solid rgba(var(--text), 0.2);
+  background: rgba(var(--primary), 0.1);
 `;
 
-const Value = styled.span`
-  text-align: right;
-  opacity: 0.9;
-  word-break: break-word;
+const TableCell = styled.td`
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  vertical-align: middle;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+
+  &:first-child {
+    font-weight: 600;
+  }
+
+  &:last-child {
+    font-weight: 400;
+  }
 `;
 
 const TotalValue = styled.span`
-  text-align: right;
   font-weight: bold;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: rgb(var(--primary));
+`;
+
+const EmptyTableMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: rgba(var(--text), 0.6);
+  font-size: 1.4rem;
+  background: rgba(var(--text), 0.05);
+  border-radius: 0.5rem;
+  border: 2px dashed rgba(var(--text), 0.25);
 `;
 
 const EmptyState = styled.div`
@@ -451,43 +549,5 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
-`;
-
-const ConceptosList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`;
-
-const ConceptosTitle = styled.h4`
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: rgb(var(--primary));
-  margin-bottom: 1rem;
-`;
-
-const ConceptoItem = styled.div`
-  background: rgba(var(--primary), 0.05);
-  padding: 1.5rem;
-  border-radius: 0.6rem;
-  border: 1px solid rgba(var(--primary), 0.2);
-`;
-
-const ConceptoHeader = styled.div`
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(var(--text), 0.1);
-`;
-
-const ConceptoLabel = styled.span`
-  font-weight: bold;
-  font-size: 1.6rem;
-  color: rgb(var(--primary));
-`;
-
-const ConceptoDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 `;
 

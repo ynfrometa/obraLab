@@ -9,6 +9,7 @@ import SectionTitle from 'components/SectionTitle';
 import { database } from 'lib/firebase';
 
 interface ConceptoItem {
+  actividad: string;
   concepto: string;
   largo: string;
   alto: string;
@@ -18,8 +19,11 @@ interface ConceptoItem {
 }
 
 interface MedicionPayload {
-  concepto: string;
-  empresa: string;
+  empresaNombre: string;
+  empresaEmail: string;
+  empresaTelefono1: string;
+  empresaTelefono2: string;
+  constructora: string;
   obra: string;
   fecha: string;
   conceptos: ConceptoItem[];
@@ -31,6 +35,7 @@ export default function MedicionFormSection() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [obrasList, setObrasList] = useState<any[]>([]);
   const [empresasList, setEmpresasList] = useState<any[]>([]);
+  const [constructorasList, setConstructorasList] = useState<any[]>([]);
   const [conceptos, setConceptos] = useState<ConceptoItem[]>([]);
   const { register, handleSubmit, formState, reset, watch, setValue } = useForm<MedicionPayload>();
   const { isSubmitting, errors } = formState;
@@ -76,8 +81,30 @@ export default function MedicionFormSection() {
     loadEmpresas();
   }, []);
 
+  // Cargar lista de constructoras para el selector
+  useEffect(() => {
+    const loadConstructoras = async () => {
+      if (!database) return;
+      try {
+        const constructorasCollection = collection(database, 'constructoras');
+        const constructorasQuery = query(constructorasCollection, orderBy('nombre', 'asc'));
+        const snapshot = await getDocs(constructorasQuery);
+        const constructoras = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setConstructorasList(constructoras);
+      } catch (error) {
+        console.error('Error al cargar constructoras:', error);
+      }
+    };
+
+    loadConstructoras();
+  }, []);
+
   const agregarConcepto = () => {
     const nuevoConcepto: ConceptoItem = {
+      actividad: '',
       concepto: '',
       largo: '',
       alto: '',
@@ -126,7 +153,7 @@ export default function MedicionFormSection() {
       // Validar que todos los conceptos tengan los campos requeridos
       const conceptosInvalidos = conceptos.some(c => !c.concepto || !c.largo || !c.alto);
       if (conceptosInvalidos) {
-        setErrorMessage('Todos los conceptos deben tener concepto, largo y alto');
+        setErrorMessage('Todos los conceptos deben tener concepto, L y H');
         setHasErrored(true);
         return;
       }
@@ -144,11 +171,16 @@ export default function MedicionFormSection() {
       console.log('Firebase database está inicializado:', !!database);
 
       const newMedicion = {
-        concepto: payload.concepto,
-        empresa: payload.empresa,
+        empresaNombre: payload.empresaNombre,
+        empresaEmail: payload.empresaEmail,
+        empresaTelefono1: payload.empresaTelefono1,
+        empresaTelefono2: payload.empresaTelefono2,
+        constructora: payload.constructora,
         obra: payload.obra,
         fecha: payload.fecha,
         conceptos: conceptos,
+        // Mantener compatibilidad con estructura anterior
+        empresa: payload.empresaNombre,
         fechaCreacion: new Date().getTime(),
       };
       
@@ -223,164 +255,242 @@ export default function MedicionFormSection() {
       )}
       <Form onSubmit={handleSubmit(onSubmit)}>
         <HeaderSection>
-          <InputStack>
-            {errors.concepto && <ErrorMessage>El concepto es requerido</ErrorMessage>}
-            <StyledInput
-              placeholder="Concepto (descripción) *"
-              id="concepto"
-              disabled={isDisabled}
-              {...register('concepto', { required: true })}
-            />
-          </InputStack>
-          <InputGroup>
-            <InputStack>
-              {errors.empresa && <ErrorMessage>La empresa es requerida</ErrorMessage>}
-              {empresasList.length > 0 ? (
-                <SelectInput
-                  id="empresa"
-                  disabled={isDisabled}
-                  {...register('empresa', { required: true })}
-                >
-                  <option value="">Selecciona una empresa</option>
-                  {empresasList.map((empresa) => (
-                    <option key={empresa.id} value={empresa.nombre}>
-                      {empresa.nombre}
-                    </option>
-                  ))}
-                </SelectInput>
-              ) : (
-                <Input 
-                  placeholder="Empresa" 
-                  id="empresa" 
-                  disabled={isDisabled} 
-                  {...register('empresa', { required: true })} 
+          <HeaderLeft>
+            <ProjectInfo>
+              <ProjectRow>
+                <ProjectLabel>Constructora:</ProjectLabel>
+                <ProjectValue>
+                  {errors.constructora && <ErrorMessage>La constructora es requerida</ErrorMessage>}
+                  {constructorasList.length > 0 ? (
+                    <SelectInput
+                      id="constructora"
+                      disabled={isDisabled}
+                      {...register('constructora', { required: true })}
+                    >
+                      <option value="">Selecciona una constructora</option>
+                      {constructorasList.map((constructora) => (
+                        <option key={constructora.id} value={constructora.nombre}>
+                          {constructora.nombre}
+                        </option>
+                      ))}
+                    </SelectInput>
+                  ) : (
+                    <StyledInput
+                      placeholder="Constructora *"
+                      id="constructora"
+                      disabled={isDisabled}
+                      {...register('constructora', { required: true })}
+                    />
+                  )}
+                </ProjectValue>
+              </ProjectRow>
+              <ProjectRow>
+                <ProjectLabel>Obra:</ProjectLabel>
+                <ProjectValue>
+                  {errors.obra && <ErrorMessage>La obra es requerida</ErrorMessage>}
+                  {obrasList.length > 0 ? (
+                    <SelectInput
+                      id="obra"
+                      disabled={isDisabled}
+                      {...register('obra', { required: true })}
+                    >
+                      <option value="">Selecciona una obra</option>
+                      {obrasList.map((obra) => (
+                        <option key={obra.id} value={obra.empresa}>
+                          {obra.empresa}
+                        </option>
+                      ))}
+                    </SelectInput>
+                  ) : (
+                    <StyledInput
+                      placeholder="Obra *"
+                      id="obra"
+                      disabled={isDisabled}
+                      {...register('obra', { required: true })}
+                    />
+                  )}
+                </ProjectValue>
+              </ProjectRow>
+              <ProjectRow>
+                <ProjectLabel>Fecha:</ProjectLabel>
+                <ProjectValue>
+                  {errors.fecha && <ErrorMessage>La fecha es requerida</ErrorMessage>}
+                  <StyledInput
+                    type="date"
+                    placeholder="Fecha *"
+                    id="fecha"
+                    disabled={isDisabled}
+                    {...register('fecha', { required: true })}
+                  />
+                </ProjectValue>
+              </ProjectRow>
+            </ProjectInfo>
+          </HeaderLeft>
+          <HeaderRight>
+            <CompanyInfo>
+              <CompanyName>
+                {errors.empresaNombre && <ErrorMessage>El nombre es requerido</ErrorMessage>}
+                {empresasList.length > 0 ? (
+                  <SelectInput
+                    id="empresaNombre"
+                    disabled={isDisabled}
+                    {...register('empresaNombre', { required: true })}
+                    onChange={(e) => {
+                      const empresaSeleccionada = empresasList.find(emp => emp.nombre === e.target.value);
+                      if (empresaSeleccionada) {
+                        setValue('empresaEmail', empresaSeleccionada.email || '');
+                        setValue('empresaTelefono1', empresaSeleccionada.telefono || empresaSeleccionada.telefono1 || '');
+                        setValue('empresaTelefono2', empresaSeleccionada.telefono2 || '');
+                      } else {
+                        setValue('empresaEmail', '');
+                        setValue('empresaTelefono1', '');
+                        setValue('empresaTelefono2', '');
+                      }
+                    }}
+                  >
+                    <option value="">Selecciona una empresa</option>
+                    {empresasList.map((empresa) => (
+                      <option key={empresa.id} value={empresa.nombre}>
+                        {empresa.nombre}
+                      </option>
+                    ))}
+                  </SelectInput>
+                ) : (
+                  <StyledInput
+                    placeholder="Nombre empresa *"
+                    id="empresaNombre"
+                    disabled={isDisabled}
+                    {...register('empresaNombre', { required: true })}
+                  />
+                )}
+              </CompanyName>
+              <CompanyDetail>
+                <Label>Email:</Label>
+                <StyledInput
+                  type="email"
+                  placeholder="Email *"
+                  id="empresaEmail"
+                  readOnly
+                  {...register('empresaEmail', { required: true })}
                 />
-              )}
-            </InputStack>
-            <InputStack>
-              {errors.obra && <ErrorMessage>La obra es requerida</ErrorMessage>}
-              {obrasList.length > 0 ? (
-                <SelectInput
-                  id="obra"
-                  disabled={isDisabled}
-                  {...register('obra', { required: true })}
-                >
-                  <option value="">Selecciona una obra</option>
-                  {obrasList.map((obra) => (
-                    <option key={obra.id} value={obra.empresa}>
-                      {obra.empresa}
-                    </option>
-                  ))}
-                </SelectInput>
-              ) : (
-                <Input 
-                  placeholder="Obra" 
-                  id="obra" 
-                  disabled={isDisabled} 
-                  {...register('obra', { required: true })} 
+              </CompanyDetail>
+              <CompanyDetail>
+                <Label>Teléfonos:</Label>
+                <StyledInput
+                  type="tel"
+                  placeholder="Teléfono 1 *"
+                  id="empresaTelefono1"
+                  readOnly
+                  {...register('empresaTelefono1', { required: true })}
                 />
-              )}
-            </InputStack>
-            <InputStack>
-              {errors.fecha && <ErrorMessage>La fecha es requerida</ErrorMessage>}
-              <StyledInput 
-                type="date"
-                placeholder="Fecha *" 
-                id="fecha" 
-                disabled={isDisabled} 
-                {...register('fecha', { required: true })} 
-              />
-            </InputStack>
-          </InputGroup>
+                <StyledInput
+                  type="tel"
+                  placeholder="Teléfono 2"
+                  id="empresaTelefono2"
+                  readOnly
+                  {...register('empresaTelefono2')}
+                />
+              </CompanyDetail>
+            </CompanyInfo>
+          </HeaderRight>
         </HeaderSection>
 
         <ConceptosSection>
           <ConceptosHeader>
-            <h3>Mediciones</h3>
+            <h3>HOJA DE MEDICIONES</h3>
             <AddButton type="button" onClick={agregarConcepto} disabled={isDisabled}>
-              + Agregar Medicion
+              + Agregar Fila
             </AddButton>
           </ConceptosHeader>
 
           {conceptos.length === 0 && (
             <EmptyState>
-              No hay conceptos agregados. Haz clic en "Agregar Medicion" para comenzar.
+              No hay mediciones agregadas. Haz clic en "Agregar Fila" para comenzar.
             </EmptyState>
           )}
 
-          {conceptos.map((concepto, index) => (
-            <ConceptoCard key={index}>
-              <ConceptoHeader>
-                <ConceptoTitle>Concepto #{index + 1}</ConceptoTitle>
-                <DeleteButton type="button" onClick={() => eliminarConcepto(index)} disabled={isDisabled}>
-                  × Eliminar
-                </DeleteButton>
-              </ConceptoHeader>
-              
-              <InputStack>
-                <StyledInput 
-                  placeholder="Concepto *" 
-                  disabled={isDisabled}
-                  value={concepto.concepto}
-                  onChange={(e) => actualizarConcepto(index, 'concepto', e.target.value)}
-                  required
-                />
-              </InputStack>
-
-              <InputGroup>
-                <InputStack>
-                  <StyledInput 
-                    type="number"
-                    step="0.01"
-                    placeholder="Largo *" 
-                    disabled={isDisabled}
-                    value={concepto.largo}
-                    onChange={(e) => actualizarConcepto(index, 'largo', e.target.value)}
-                    required
-                  />
-                </InputStack>
-                <InputStack>
-                  <StyledInput 
-                    type="number"
-                    step="0.01"
-                    placeholder="Alto *" 
-                    disabled={isDisabled}
-                    value={concepto.alto}
-                    onChange={(e) => actualizarConcepto(index, 'alto', e.target.value)}
-                    required
-                  />
-                </InputStack>
-                <InputStack>
-                  <StyledInput 
-                    type="number"
-                    step="0.01"
-                    placeholder="Cantidad (por defecto: 1)" 
-                    disabled={isDisabled}
-                    value={concepto.cantidad}
-                    onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
-                  />
-                </InputStack>
-              </InputGroup>
-
-              <InputStack>
-                <TotalDisplay>
-                  <TotalLabel>Total calculado:</TotalLabel>
-                  <TotalValue>{concepto.total}</TotalValue>
-                </TotalDisplay>
-              </InputStack>
-
-              <InputStack>
-                <Label>Observaciones (opcional)</Label>
-                <Textarea
-                  as="textarea"
-                  placeholder="Observaciones adicionales"
-                  disabled={isDisabled}
-                  value={concepto.observaciones}
-                  onChange={(e) => actualizarConcepto(index, 'observaciones', e.target.value)}
-                />
-              </InputStack>
-            </ConceptoCard>
-          ))}
+          {conceptos.length > 0 && (
+            <TableContainer>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell style={{ width: '15%' }}>Actividad</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '35%' }}>Concepto</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '10%' }}>L</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '10%' }}>H</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '10%' }}>N</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '15%' }}>Total</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '5%' }}></TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {conceptos.map((concepto, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <TableInput
+                          type="text"
+                          placeholder="Actividad"
+                          disabled={isDisabled}
+                          value={concepto.actividad}
+                          onChange={(e) => actualizarConcepto(index, 'actividad', e.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TableInput
+                          type="text"
+                          placeholder="Concepto *"
+                          disabled={isDisabled}
+                          value={concepto.concepto}
+                          onChange={(e) => actualizarConcepto(index, 'concepto', e.target.value)}
+                          required
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TableInput
+                          type="number"
+                          step="0.01"
+                          placeholder="L"
+                          disabled={isDisabled}
+                          value={concepto.largo}
+                          onChange={(e) => actualizarConcepto(index, 'largo', e.target.value)}
+                          required
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TableInput
+                          type="number"
+                          step="0.01"
+                          placeholder="H"
+                          disabled={isDisabled}
+                          value={concepto.alto}
+                          onChange={(e) => actualizarConcepto(index, 'alto', e.target.value)}
+                          required
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TableInput
+                          type="number"
+                          step="0.01"
+                          placeholder="N"
+                          disabled={isDisabled}
+                          value={concepto.cantidad}
+                          onChange={(e) => actualizarConcepto(index, 'cantidad', e.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <TotalCell>{concepto.total || '0.00'}</TotalCell>
+                      </TableCell>
+                      <TableCell>
+                        <DeleteRowButton type="button" onClick={() => eliminarConcepto(index)} disabled={isDisabled}>
+                          ×
+                        </DeleteRowButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </ConceptosSection>
 
         <Button as="button" type="submit" disabled={isSubmitDisabled}>
@@ -403,14 +513,98 @@ const Form = styled.form`
 
 const HeaderSection = styled.div`
   background: rgb(var(--cardBackground));
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 0.6rem;
   border: 2px solid rgba(var(--text), 0.25);
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+`;
+
+const HeaderLeft = styled.div`
+  flex: 1;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  min-width: 30rem;
+
+  ${media('<=tablet')} {
+    min-width: auto;
+    width: 100%;
+  }
+`;
+
+const ProjectInfo = styled.div`
+  display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
+`;
+
+const ProjectRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const ProjectLabel = styled.label`
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: rgb(var(--text));
+  min-width: 12rem;
+`;
+
+const ProjectValue = styled.div`
+  flex: 1;
+  min-width: 20rem;
+`;
+
+const CompanyInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  text-align: right;
+
+  ${media('<=tablet')} {
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+`;
+
+const CompanyName = styled.div`
+  font-weight: bold;
+  font-size: 1.6rem;
+  color: rgb(var(--text));
+  margin-bottom: 0.5rem;
+  width: 100%;
+`;
+
+const CompanyDetail = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+
+  input {
+    flex: 1;
+  }
+
+  label {
+    min-width: 8rem;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+  }
 `;
 
 const ConceptosSection = styled.div`
@@ -553,6 +747,17 @@ const StyledInput = styled(Input)`
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  &[readonly] {
+    background: rgba(var(--text), 0.05);
+    cursor: default;
+    opacity: 0.8;
+    
+    &:focus {
+      border-color: rgba(var(--text), 0.25);
+      box-shadow: none;
+    }
+  }
 `;
 
 const Textarea = styled(StyledInput)`
@@ -657,4 +862,102 @@ const EmptyState = styled.p`
   background: rgba(var(--text), 0.05);
   border-radius: 0.5rem;
   border: 2px dashed rgba(var(--text), 0.25);
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+  margin-top: 1rem;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 2px solid rgba(var(--text), 0.2);
+`;
+
+const TableHeader = styled.thead`
+  background: rgba(var(--primary), 0.1);
+`;
+
+const TableBody = styled.tbody``;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background: rgba(var(--text), 0.02);
+  }
+  &:hover {
+    background: rgba(var(--primary), 0.05);
+  }
+`;
+
+const TableHeaderCell = styled.th`
+  padding: 1rem;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: rgb(var(--text));
+  border: 1px solid rgba(var(--text), 0.2);
+  background: rgba(var(--primary), 0.1);
+`;
+
+const TableCell = styled.td`
+  padding: 0.5rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  vertical-align: middle;
+`;
+
+const TableInput = styled.input`
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--text), 0.2);
+  border-radius: 0.3rem;
+  font-size: 1.3rem;
+  background: transparent;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--primary));
+    box-shadow: 0 0 0 2px rgba(var(--primary), 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const TotalCell = styled.div`
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: rgb(var(--primary));
+  text-align: right;
+  padding: 0.8rem;
+`;
+
+const DeleteRowButton = styled.button`
+  background: rgb(var(--errorColor));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  margin: 0 auto;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;

@@ -12,6 +12,7 @@ interface Empresa {
   nombre: string;
   direccion?: string;
   telefono?: string;
+  telefono2?: string;
   email?: string;
   fechaCreacion: number;
 }
@@ -43,6 +44,7 @@ export default function EditEmpresaForm({ empresa, onClose }: EditEmpresaFormPro
         nombre: payload.nombre,
         direccion: payload.direccion || '',
         telefono: payload.telefono || '',
+        telefono2: payload.telefono2 || '',
         email: payload.email || '',
       });
 
@@ -95,6 +97,17 @@ export default function EditEmpresaForm({ empresa, onClose }: EditEmpresaFormPro
               {...register('telefono')}
             />
           </InputStack>
+          <InputStack>
+            <StyledInput
+              type="tel"
+              placeholder="Teléfono 2 (opcional)"
+              id="telefono2"
+              disabled={isDisabled}
+              {...register('telefono2')}
+            />
+          </InputStack>
+        </InputGroup>
+        <InputGroup>
           <InputStack>
             <StyledInput
               type="email"

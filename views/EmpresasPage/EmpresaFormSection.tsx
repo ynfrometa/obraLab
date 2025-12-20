@@ -12,6 +12,7 @@ interface EmpresaPayload {
   nombre: string;
   direccion?: string;
   telefono?: string;
+  telefono2?: string;
   email?: string;
 }
 
@@ -111,6 +112,17 @@ export default function EmpresaFormSection() {
               {...register('telefono')}
             />
           </InputStack>
+          <InputStack>
+            <StyledInput
+              type="tel"
+              placeholder="Teléfono 2 (opcional)"
+              id="telefono2"
+              disabled={isDisabled}
+              {...register('telefono2')}
+            />
+          </InputStack>
+        </InputGroup>
+        <InputGroup>
           <InputStack>
             <StyledInput
               type="email"
