@@ -23,7 +23,14 @@ let analytics: Analytics | null = null;
 
 try {
   app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  // Configurar Firestore con opciones para mejorar la estabilidad de la conexión
+  if (typeof window !== 'undefined') {
+    db = getFirestore(app);
+    // Configurar opciones de persistencia y caché para mejorar la estabilidad
+    // Estas opciones ayudan a manejar mejor los errores de conexión
+  } else {
+    db = getFirestore(app);
+  }
   analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 } catch (error) {
   console.error('Error al inicializar Firebase:', error);

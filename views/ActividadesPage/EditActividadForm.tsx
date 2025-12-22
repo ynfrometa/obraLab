@@ -61,20 +61,17 @@ export default function EditActividadForm({ actividad, onClose }: EditActividadF
       {hasErrored && <ErrorMessage>Error al actualizar actividad. Por favor, intenta de nuevo.</ErrorMessage>}
       <Form onSubmit={handleSubmit(onSubmit)}>
         <InputStack>
-          {errors.descripcion && <ErrorMessage>La descripción es requerida (una sola palabra)</ErrorMessage>}
+          {errors.descripcion && <ErrorMessage>La descripción es requerida</ErrorMessage>}
           <StyledInput
             type="text"
-            placeholder="Descripción (una palabra) *"
+            placeholder="Descripción *"
             id="descripcion"
             disabled={isDisabled}
             {...register('descripcion', { 
-              required: true,
-              validate: (value) => {
-                const trimmed = value.trim();
-                if (trimmed.split(/\s+/).length > 1) {
-                  return 'La descripción debe ser una sola palabra';
-                }
-                return true;
+              required: 'La descripción es requerida',
+              minLength: {
+                value: 1,
+                message: 'La descripción debe tener al menos un carácter'
               }
             })}
           />
@@ -134,20 +131,12 @@ const SuccessMessage = styled.p`
 
 const StyledInput = styled(Input)`
   width: 100%;
-  max-width: 30rem;
   font-size: 1.4rem;
   padding: 1rem 1.2rem;
   border: 2px solid rgba(var(--text), 0.25);
   border-radius: 0.5rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
-  text-transform: capitalize;
-
-  ${media('<=phone')} {
-    max-width: 100%;
-    font-size: 1.3rem;
-    padding: 0.9rem 1rem;
-  }
 
   &:focus {
     outline: none;

@@ -26,7 +26,7 @@ interface Medicion {
   empresaTelefono1?: string;
   empresaTelefono2?: string;
   constructora?: string;
-  obra: string;
+  obra: string | string[]; // Puede ser string o array de strings
   fecha: string;
   conceptos?: ConceptoItem[]; // Nueva estructura con array de conceptos
   // Campos legacy para compatibilidad con datos antiguos
@@ -77,7 +77,7 @@ export default function MedicionesListSection() {
             empresaTelefono1: medicionData?.empresaTelefono1 || '',
             empresaTelefono2: medicionData?.empresaTelefono2 || '',
             constructora: medicionData?.constructora || '',
-            obra: medicionData?.obra || '',
+            obra: Array.isArray(medicionData?.obra) ? medicionData.obra : (medicionData?.obra || ''),
             fecha: medicionData?.fecha || '',
             conceptos: medicionData?.conceptos || undefined, // Nueva estructura
             // Campos legacy para compatibilidad
@@ -179,6 +179,27 @@ export default function MedicionesListSection() {
     }
   };
 
+  // Funciones de exportación con importación dinámica para evitar problemas con SSR
+  const handleExportExcel = async (medicion: Medicion) => {
+    try {
+      const { exportToExcel } = await import('utils/exportMedicion');
+      exportToExcel(medicion);
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+      alert('Error al exportar a Excel. Por favor, intenta de nuevo.');
+    }
+  };
+
+  const handleExportPDF = async (medicion: Medicion) => {
+    try {
+      const { exportToPDF } = await import('utils/exportMedicion');
+      exportToPDF(medicion);
+    } catch (error) {
+      console.error('Error al exportar a PDF:', error);
+      alert('Error al exportar a PDF. Por favor, intenta de nuevo.');
+    }
+  };
+
   if (loading) {
     return (
       <Wrapper>
@@ -227,7 +248,18 @@ export default function MedicionesListSection() {
                     </ProjectRow>
                     <ProjectRow>
                       <ProjectLabel>Obra:</ProjectLabel>
-                      <ProjectValue>{medicion.obra}</ProjectValue>
+                      <ProjectValue>
+                        {medicion.obra 
+                          ? (() => {
+                              // Si es un array, unir con espacios
+                              if (Array.isArray(medicion.obra)) {
+                                return medicion.obra.filter(Boolean).join(' ');
+                              }
+                              // Si es string, mostrar tal cual
+                              return medicion.obra;
+                            })()
+                          : 'N/A'}
+                      </ProjectValue>
                     </ProjectRow>
                     <ProjectRow>
                       <ProjectLabel>Fecha:</ProjectLabel>
@@ -254,6 +286,14 @@ export default function MedicionesListSection() {
                         <DeleteButton onClick={() => handleDelete(medicion.id)}>×</DeleteButton>
                       </ButtonGroup>
                     </CompanyNameWrapper>
+                    <ExportButtonsGroup>
+                      <ExportButton onClick={() => handleExportExcel(medicion)} title="Exportar a Excel">
+                        📊 Excel
+                      </ExportButton>
+                      <ExportButton onClick={() => handleExportPDF(medicion)} title="Exportar a PDF">
+                        📄 PDF
+                      </ExportButton>
+                    </ExportButtonsGroup>
                     {medicion.empresaEmail && (
                       <CompanyDetail>Email: {medicion.empresaEmail}</CompanyDetail>
                     )}
@@ -641,5 +681,52 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
+`;
+
+const ExportButtonsGroup = styled.div`
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+
+  ${media('<=tablet')} {
+    justify-content: flex-start;
+  }
+
+  ${media('<=phone')} {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
+const ExportButton = styled.button`
+  background: rgb(var(--primary));
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.2s, opacity 0.2s;
+  white-space: nowrap;
+
+  ${media('<=phone')} {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;
 

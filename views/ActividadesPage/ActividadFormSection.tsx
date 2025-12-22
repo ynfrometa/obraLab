@@ -12,7 +12,11 @@ interface ActividadPayload {
   descripcion: string;
 }
 
-export default function ActividadFormSection() {
+interface ActividadFormSectionProps {
+  onSuccess?: () => void;
+}
+
+export default function ActividadFormSection({ onSuccess }: ActividadFormSectionProps) {
   const [hasSuccessfullyAdded, setHasSuccessfullyAdded] = useState(false);
   const [hasErrored, setHasErrored] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -41,7 +45,10 @@ export default function ActividadFormSection() {
 
       setTimeout(() => {
         setHasSuccessfullyAdded(false);
-      }, 3000);
+        if (onSuccess) {
+          onSuccess();
+        }
+      }, 2000);
     } catch (error: any) {
       console.error('Error al añadir actividad:', error);
       const errorMsg = error?.message || error?.code || 'Error desconocido al conectar con Firebase';
@@ -75,25 +82,29 @@ export default function ActividadFormSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Añadir Nueva Actividad</SectionTitle>
+      <FormHeader>
+        <SectionTitle>Añadir Nueva Actividad</SectionTitle>
+        {onSuccess && (
+          <CloseButton onClick={onSuccess} type="button">
+            ×
+          </CloseButton>
+        )}
+      </FormHeader>
       {hasSuccessfullyAdded && <SuccessMessage>✓ Actividad añadida correctamente</SuccessMessage>}
       {hasErrored && <ErrorMessage>{errorMessage}</ErrorMessage>}
       <Form onSubmit={handleSubmit(onSubmit)}>
         <InputStack>
-          {errors.descripcion && <ErrorMessage>La descripción es requerida (una sola palabra)</ErrorMessage>}
+          {errors.descripcion && <ErrorMessage>La descripción es requerida</ErrorMessage>}
           <StyledInput
             type="text"
-            placeholder="Descripción (una palabra) *"
+            placeholder="Descripción *"
             id="descripcion"
             disabled={isDisabled}
             {...register('descripcion', { 
-              required: true,
-              validate: (value) => {
-                const trimmed = value.trim();
-                if (trimmed.split(/\s+/).length > 1) {
-                  return 'La descripción debe ser una sola palabra';
-                }
-                return true;
+              required: 'La descripción es requerida',
+              minLength: {
+                value: 1,
+                message: 'La descripción debe tener al menos un carácter'
               }
             })}
           />
@@ -150,22 +161,42 @@ const SuccessMessage = styled.p`
   text-align: center;
 `;
 
+const FormHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 2rem;
+`;
+
+const CloseButton = styled.button`
+  background: rgb(var(--errorColor));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
 const StyledInput = styled(Input)`
   width: 100%;
-  max-width: 30rem;
   font-size: 1.4rem;
   padding: 1rem 1.2rem;
   border: 2px solid rgba(var(--text), 0.25);
   border-radius: 0.5rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
-  text-transform: capitalize;
-
-  ${media('<=phone')} {
-    max-width: 100%;
-    font-size: 1.3rem;
-    padding: 0.9rem 1rem;
-  }
 
   &:focus {
     outline: none;

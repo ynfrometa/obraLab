@@ -18,7 +18,11 @@ interface WorkerPayload {
   workStatus: string;
 }
 
-export default function WorkerFormSection() {
+interface WorkerFormSectionProps {
+  onSuccess?: () => void;
+}
+
+export default function WorkerFormSection({ onSuccess }: WorkerFormSectionProps) {
   const [hasSuccessfullyAdded, setHasSuccessfullyAdded] = useState(false);
   const [hasErrored, setHasErrored] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -112,10 +116,13 @@ export default function WorkerFormSection() {
       setHasSuccessfullyAdded(true);
       reset();
       
-      // Resetear el mensaje de éxito después de 3 segundos
+      // Resetear el mensaje de éxito después de 2 segundos
       setTimeout(() => {
         setHasSuccessfullyAdded(false);
-      }, 3000);
+        if (onSuccess) {
+          onSuccess();
+        }
+      }, 2000);
     } catch (error: any) {
       console.error('=== ERROR AL AÑADIR TRABAJADOR ===');
       console.error('Error completo:', error);
@@ -147,7 +154,14 @@ export default function WorkerFormSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Añadir Nuevo Trabajador</SectionTitle>
+      <FormHeader>
+        <SectionTitle>Añadir Nuevo Trabajador</SectionTitle>
+        {onSuccess && (
+          <CloseButton onClick={onSuccess} type="button">
+            ×
+          </CloseButton>
+        )}
+      </FormHeader>
       {hasSuccessfullyAdded && <SuccessMessage>✓ Trabajador añadido correctamente</SuccessMessage>}
       {hasErrored && (
         <ErrorMessage>
@@ -386,6 +400,34 @@ const SuccessMessage = styled.p`
   border-radius: 0.6rem;
   margin-bottom: 1.5rem;
   text-align: center;
+`;
+
+const FormHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 2rem;
+`;
+
+const CloseButton = styled.button`
+  background: rgb(var(--errorColor));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
 
 const CodeBlock = styled.pre`

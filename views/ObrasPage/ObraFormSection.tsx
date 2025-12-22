@@ -22,7 +22,11 @@ interface ObraPayload {
   solicitud: string;
 }
 
-export default function ObraFormSection() {
+interface ObraFormSectionProps {
+  onSuccess?: () => void;
+}
+
+export default function ObraFormSection({ onSuccess }: ObraFormSectionProps) {
   const [hasSuccessfullyAdded, setHasSuccessfullyAdded] = useState(false);
   const [hasErrored, setHasErrored] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -144,10 +148,13 @@ export default function ObraFormSection() {
       setEmpresasSeleccionadas([]);
       reset();
       
-      // Resetear el mensaje de éxito después de 3 segundos
+      // Resetear el mensaje de éxito después de 2 segundos
       setTimeout(() => {
         setHasSuccessfullyAdded(false);
-      }, 3000);
+        if (onSuccess) {
+          onSuccess();
+        }
+      }, 2000);
     } catch (error: any) {
       console.error('=== ERROR AL AÑADIR OBRA ===');
       console.error('Error completo:', error);
@@ -177,7 +184,14 @@ export default function ObraFormSection() {
 
   return (
     <Wrapper>
-      <SectionTitle>Añadir Nueva Obra</SectionTitle>
+      <FormHeader>
+        <SectionTitle>Añadir Nueva Obra</SectionTitle>
+        {onSuccess && (
+          <CloseButton onClick={onSuccess} type="button">
+            ×
+          </CloseButton>
+        )}
+      </FormHeader>
       {hasSuccessfullyAdded && <SuccessMessage>✓ Obra añadida correctamente</SuccessMessage>}
       {hasErrored && (
         <ErrorMessage>
@@ -416,6 +430,34 @@ const SuccessMessage = styled.p`
   background: rgba(34, 197, 94, 0.1);
   border-radius: 0.6rem;
   margin-bottom: 2rem;
+`;
+
+const FormHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 2rem;
+`;
+
+const CloseButton = styled.button`
+  background: rgb(var(--errorColor));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
 
 const StyledInput = styled(Input)`

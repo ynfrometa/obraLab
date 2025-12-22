@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import Page from 'components/Page';
 import { media } from 'utils/media';
@@ -5,11 +6,21 @@ import ObraFormSection from 'views/ObrasPage/ObraFormSection';
 import ObrasListSection from 'views/ObrasPage/ObrasListSection';
 
 export default function ObrasPage() {
+  const [showForm, setShowForm] = useState(false);
+
+  const handleShowForm = () => {
+    setShowForm(true);
+  };
+
+  const handleHideForm = () => {
+    setShowForm(false);
+  };
+
   return (
     <Page title="Obras" description="Gestiona y añade obras de construcción.">
       <ObrasContainer>
-        <ObraFormSection />
-        <ObrasListSection />
+        {showForm && <ObraFormSection onSuccess={handleHideForm} />}
+        <ObrasListSection onShowForm={handleShowForm} />
       </ObrasContainer>
     </Page>
   );

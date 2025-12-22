@@ -17,7 +17,11 @@ interface Constructora {
   fechaCreacion: number;
 }
 
-export default function ConstructorasListSection() {
+interface ConstructorasListSectionProps {
+  onShowForm?: () => void;
+}
+
+export default function ConstructorasListSection({ onShowForm }: ConstructorasListSectionProps) {
   const [constructoras, setConstructoras] = useState<Constructora[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -142,7 +146,14 @@ export default function ConstructorasListSection() {
   if (loading) {
     return (
       <Wrapper>
-        <SectionTitle>Lista de Constructoras</SectionTitle>
+        <HeaderRow>
+          <SectionTitle>Lista de Constructoras</SectionTitle>
+          {onShowForm && (
+            <AddButton onClick={onShowForm}>
+              + Añadir Nueva Constructora
+            </AddButton>
+          )}
+        </HeaderRow>
         <EmptyState>Cargando constructoras...</EmptyState>
       </Wrapper>
     );
@@ -151,15 +162,29 @@ export default function ConstructorasListSection() {
   if (constructoras.length === 0) {
     return (
       <Wrapper>
-        <SectionTitle>Lista de Constructoras</SectionTitle>
-        <EmptyState>No hay constructoras registradas. Añade una usando el formulario de arriba.</EmptyState>
+        <HeaderRow>
+          <SectionTitle>Lista de Constructoras</SectionTitle>
+          {onShowForm && (
+            <AddButton onClick={onShowForm}>
+              + Añadir Nueva Constructora
+            </AddButton>
+          )}
+        </HeaderRow>
+        <EmptyState>No hay constructoras registradas. Añade una usando el botón de arriba.</EmptyState>
       </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      <SectionTitle>Lista de Constructoras</SectionTitle>
+      <HeaderRow>
+        <SectionTitle>Lista de Constructoras</SectionTitle>
+        {onShowForm && (
+          <AddButton onClick={onShowForm}>
+            + Añadir Nueva Constructora
+          </AddButton>
+        )}
+      </HeaderRow>
       <ConstructorasGrid>
         {constructoras.map((constructora) => (
           <ConstructoraCard key={constructora.id}>
@@ -460,6 +485,45 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+`;
+
+const AddButton = styled.button`
+  background: rgb(var(--primary));
+  color: rgb(var(--textSecondary));
+  border: 2px solid rgb(var(--primary));
+  padding: 1rem 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.2s, background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    transform: scale(1.05);
+    background: rgba(var(--primary), 0.9);
+  }
+
+  ${media('<=phone')} {
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 0.8rem 1.5rem;
+  }
 `;
 
 

@@ -14,7 +14,11 @@ interface Actividad {
   fechaCreacion: number;
 }
 
-export default function ActividadesListSection() {
+interface ActividadesListSectionProps {
+  onShowForm?: () => void;
+}
+
+export default function ActividadesListSection({ onShowForm }: ActividadesListSectionProps) {
   const [actividades, setActividades] = useState<Actividad[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -133,7 +137,14 @@ export default function ActividadesListSection() {
   if (loading) {
     return (
       <Wrapper>
-        <SectionTitle>Lista de Actividades</SectionTitle>
+        <HeaderRow>
+          <SectionTitle>Lista de Actividades</SectionTitle>
+          {onShowForm && (
+            <AddButton onClick={onShowForm}>
+              + Añadir Nueva Actividad
+            </AddButton>
+          )}
+        </HeaderRow>
         <EmptyState>Cargando actividades...</EmptyState>
       </Wrapper>
     );
@@ -142,15 +153,29 @@ export default function ActividadesListSection() {
   if (actividades.length === 0) {
     return (
       <Wrapper>
-        <SectionTitle>Lista de Actividades</SectionTitle>
-        <EmptyState>No hay actividades registradas. Añade una usando el formulario de arriba.</EmptyState>
+        <HeaderRow>
+          <SectionTitle>Lista de Actividades</SectionTitle>
+          {onShowForm && (
+            <AddButton onClick={onShowForm}>
+              + Añadir Nueva Actividad
+            </AddButton>
+          )}
+        </HeaderRow>
+        <EmptyState>No hay actividades registradas. Añade una usando el botón de arriba.</EmptyState>
       </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      <SectionTitle>Lista de Actividades</SectionTitle>
+      <HeaderRow>
+        <SectionTitle>Lista de Actividades</SectionTitle>
+        {onShowForm && (
+          <AddButton onClick={onShowForm}>
+            + Añadir Nueva Actividad
+          </AddButton>
+        )}
+      </HeaderRow>
       <ActividadesGrid>
         {actividades.map((actividad) => (
           <ActividadCard key={actividad.id}>
@@ -447,5 +472,44 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+
+  ${media('<=tablet')} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+`;
+
+const AddButton = styled.button`
+  background: rgb(var(--primary));
+  color: rgb(var(--textSecondary));
+  border: 2px solid rgb(var(--primary));
+  padding: 1rem 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.2s, background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    transform: scale(1.05);
+    background: rgba(var(--primary), 0.9);
+  }
+
+  ${media('<=phone')} {
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 0.8rem 1.5rem;
+  }
 `;
 

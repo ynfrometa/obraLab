@@ -24,7 +24,7 @@ interface Medicion {
   empresaTelefono1?: string;
   empresaTelefono2?: string;
   constructora?: string;
-  obra: string;
+  obra: string | string[]; // Puede ser string o array de strings
   fecha: string;
   conceptos?: ConceptoItem[];
   // Campos legacy para compatibilidad
@@ -79,7 +79,7 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       empresaTelefono1: medicion.empresaTelefono1 || '',
       empresaTelefono2: medicion.empresaTelefono2 || '',
       constructora: medicion.constructora || '',
-      obra: medicion.obra,
+      obra: Array.isArray(medicion.obra) ? medicion.obra[0] || '' : (medicion.obra || ''),
       fecha: medicion.fecha,
     },
   });
@@ -213,7 +213,7 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       alert('Todos los conceptos deben tener concepto, L y H');
       return;
     }
-    
+
     onSave({
       ...data,
       conceptos: conceptos,
@@ -259,18 +259,44 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
               <ProjectValue>
                 {errors.obra && <ErrorMessage>La obra es requerida</ErrorMessage>}
                 {obrasList.length > 0 ? (
-                  <SelectInput
-                    id="obra"
-                    disabled={isSubmitting}
-                    {...register('obra', { required: true })}
-                  >
-                    <option value="">Selecciona una obra</option>
-                    {obrasList.map((obra) => (
-                      <option key={obra.id} value={obra.empresa}>
-                        {obra.empresa}
-                      </option>
-                    ))}
-                  </SelectInput>
+                  <>
+                    <SelectInput
+                      id="obra"
+                      multiple
+                      disabled={isSubmitting}
+                      {...register('obra', { 
+                        required: true,
+                        setValueAs: (value) => {
+                          // Convertir el valor del select múltiple a array
+                          if (Array.isArray(value)) {
+                            return value;
+                          }
+                          // Si es un HTMLSelectElement, obtener los valores seleccionados
+                          if (value && typeof value === 'object' && 'selectedOptions' in value) {
+                            return Array.from((value as HTMLSelectElement).selectedOptions, option => option.value);
+                          }
+                          return value ? [value] : [];
+                        },
+                        validate: (value) => {
+                          const selected = Array.isArray(value) ? value : (value ? [value] : []);
+                          return selected.length > 0 || 'Debes seleccionar al menos una obra';
+                        }
+                      })}
+                      style={{ minHeight: '120px' }}
+                      onChange={(e) => {
+                        // Manejar el cambio manualmente para obtener los valores seleccionados
+                        const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
+                        setValue('obra', selectedValues);
+                      }}
+                    >
+                      {obrasList.map((obra) => (
+                        <option key={obra.id} value={obra.descripcion || obra.id}>
+                          {obra.descripcion || obra.id}
+                        </option>
+                      ))}
+                    </SelectInput>
+                    <HelperText>Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples obras</HelperText>
+                  </>
                 ) : (
                   <StyledInput
                     placeholder="Obra *"
