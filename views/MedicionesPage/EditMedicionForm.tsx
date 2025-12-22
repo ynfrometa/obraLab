@@ -259,44 +259,28 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
               <ProjectValue>
                 {errors.obra && <ErrorMessage>La obra es requerida</ErrorMessage>}
                 {obrasList.length > 0 ? (
-                  <>
-                    <SelectInput
-                      id="obra"
-                      multiple
-                      disabled={isSubmitting}
-                      {...register('obra', { 
-                        required: true,
-                        setValueAs: (value) => {
-                          // Convertir el valor del select múltiple a array
-                          if (Array.isArray(value)) {
-                            return value;
-                          }
-                          // Si es un HTMLSelectElement, obtener los valores seleccionados
-                          if (value && typeof value === 'object' && 'selectedOptions' in value) {
-                            return Array.from((value as HTMLSelectElement).selectedOptions, option => option.value);
-                          }
-                          return value ? [value] : [];
-                        },
-                        validate: (value) => {
-                          const selected = Array.isArray(value) ? value : (value ? [value] : []);
-                          return selected.length > 0 || 'Debes seleccionar al menos una obra';
-                        }
-                      })}
-                      style={{ minHeight: '120px' }}
-                      onChange={(e) => {
-                        // Manejar el cambio manualmente para obtener los valores seleccionados
-                        const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
-                        setValue('obra', selectedValues);
-                      }}
-                    >
-                      {obrasList.map((obra) => (
-                        <option key={obra.id} value={obra.descripcion || obra.id}>
-                          {obra.descripcion || obra.id}
+                  <SelectInput
+                    id="obra"
+                    disabled={isSubmitting}
+                    {...register('obra', { required: true })}
+                  >
+                    <option value="">Selecciona una obra</option>
+                    {obrasList.map((obra) => {
+                      // Formatear empresa: si es array, unir con comas; si es string, usar directamente
+                      const empresaTexto = Array.isArray(obra.empresa) 
+                        ? obra.empresa.filter(Boolean).join(',')
+                        : obra.empresa || '';
+                      const empresaDisplay = Array.isArray(obra.empresa) 
+                        ? obra.empresa.filter(Boolean).join(', ')
+                        : obra.empresa || '';
+                      
+                      return (
+                        <option key={obra.id} value={empresaTexto}>
+                          {obra.descripcion || obra.id} - {empresaDisplay}
                         </option>
-                      ))}
-                    </SelectInput>
-                    <HelperText>Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples obras</HelperText>
-                  </>
+                      );
+                    })}
+                  </SelectInput>
                 ) : (
                   <StyledInput
                     placeholder="Obra *"
