@@ -112,8 +112,19 @@ export async function getStaticPaths() {
       })),
       fallback: false,
     };
-  } catch (error) {
-    console.warn('Error fetching blog posts for static paths:', error);
+  } catch (error: any) {
+    // Silenciar errores de conexión a TinaCMS durante el build (normal cuando TinaCMS no está disponible)
+    if (error?.code === 'ECONNREFUSED' || error?.cause?.code === 'ECONNREFUSED') {
+      // Error esperado cuando TinaCMS no está disponible durante el build
+      return {
+        paths: [],
+        fallback: false,
+      };
+    }
+    // Solo loguear otros errores inesperados
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching blog posts for static paths:', error);
+    }
     return {
       paths: [],
       fallback: false,
@@ -158,8 +169,17 @@ export async function getStaticProps({ params }: GetStaticPropsContext<{ slug: s
     return {
       props: { slug, variables, query, data: data as { getPostsDocument: PostsDocument } },
     };
-  } catch (error) {
-    console.warn('Error fetching blog post:', error);
+  } catch (error: any) {
+    // Silenciar errores de conexión a TinaCMS durante el build
+    if (error?.code === 'ECONNREFUSED' || error?.cause?.code === 'ECONNREFUSED') {
+      return {
+        notFound: true as const,
+      };
+    }
+    // Solo loguear otros errores inesperados en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching blog post:', error);
+    }
     return {
       notFound: true as const,
     };

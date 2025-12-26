@@ -74,14 +74,16 @@ export default function Navbar({ items }: NavbarProps) {
             <Logo />
           </LogoWrapper>
         </NextLink>
-        <NavItemList>
-          {items.map((item, index) => {
-            if ('items' in item) {
-              return <NavGroupComponent key={index} group={item} />;
-            }
-            return <NavItem key={item.href} {...item} />;
-          })}
-        </NavItemList>
+        {isAuthenticated && (
+          <NavItemList>
+            {items.map((item, index) => {
+              if ('items' in item) {
+                return <NavGroupComponent key={index} group={item} />;
+              }
+              return <NavItem key={item.href} {...item} />;
+            })}
+          </NavItemList>
+        )}
         <ColorSwitcherContainer>
           <ColorSwitcher />
         </ColorSwitcherContainer>

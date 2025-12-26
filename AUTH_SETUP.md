@@ -60,3 +60,4 @@ Si no se configuran las variables de entorno, se usarán los siguientes valores 
 4. Implementar rate limiting
 5. Agregar validación adicional del lado del servidor
 
+
