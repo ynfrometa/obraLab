@@ -27,6 +27,7 @@ const navItems: NavItems = [
       { title: 'Trabajadores', href: '/trabajadores' },
       { title: 'Obras', href: '/obras' },
       { title: 'Actividades', href: '/actividades' },
+      { title: 'Hoja de Pedidos', href: '/hoja-pedidos' },
     ],
   },
   { title: 'Hoja de Mediciones', href: '/hoja-mediciones' },

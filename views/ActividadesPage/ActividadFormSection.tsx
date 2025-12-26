@@ -82,31 +82,18 @@ export default function ActividadFormSection({ onSuccess }: ActividadFormSection
 
   return (
     <Wrapper>
-      <FormHeader>
-        <SectionTitle>Añadir Nueva Actividad</SectionTitle>
-        {onSuccess && (
-          <CloseButton onClick={onSuccess} type="button">
-            ×
-          </CloseButton>
-        )}
-      </FormHeader>
+      <SectionTitle>Añadir Nueva Actividad</SectionTitle>
       {hasSuccessfullyAdded && <SuccessMessage>✓ Actividad añadida correctamente</SuccessMessage>}
       {hasErrored && <ErrorMessage>{errorMessage}</ErrorMessage>}
       <Form onSubmit={handleSubmit(onSubmit)}>
         <InputStack>
           {errors.descripcion && <ErrorMessage>La descripción es requerida</ErrorMessage>}
-          <StyledInput
-            type="text"
+          <StyledTextarea
+            as="textarea"
             placeholder="Descripción *"
             id="descripcion"
             disabled={isDisabled}
-            {...register('descripcion', { 
-              required: 'La descripción es requerida',
-              minLength: {
-                value: 1,
-                message: 'La descripción debe tener al menos un carácter'
-              }
-            })}
+            {...register('descripcion', { required: true })}
           />
         </InputStack>
         <Button as="button" type="submit" disabled={isSubmitDisabled}>
@@ -161,36 +148,10 @@ const SuccessMessage = styled.p`
   text-align: center;
 `;
 
-const FormHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 2rem;
-`;
-
-const CloseButton = styled.button`
-  background: rgb(var(--errorColor));
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  font-size: 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-`;
-
-const StyledInput = styled(Input)`
+const StyledTextarea = styled(Input)`
   width: 100%;
+  min-height: 8rem;
+  resize: vertical;
   font-size: 1.4rem;
   padding: 1rem 1.2rem;
   border: 2px solid rgba(var(--text), 0.25);
