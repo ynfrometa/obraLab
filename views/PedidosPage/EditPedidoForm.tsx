@@ -12,6 +12,7 @@ interface Pedido {
   fecha: string;
   descripcion: string;
   cantidad: string;
+  costo: string;
   constructora: string;
   obra: string;
   empresa: string;
