@@ -6,6 +6,7 @@ import 'swiper/css/autoplay';
 import { AppProps } from 'next/dist/shared/lib/router/router';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { ColorModeScript } from 'nextjs-color-mode';
 import React, { PropsWithChildren } from 'react';
 import { TinaEditProvider } from 'tinacms/dist/edit-state';
@@ -15,6 +16,8 @@ import { GlobalStyle } from 'components/GlobalStyles';
 import Navbar from 'components/Navbar';
 import NavigationDrawer from 'components/NavigationDrawer';
 import NewsletterModal from 'components/NewsletterModal';
+import ProtectedRoute from 'components/ProtectedRoute';
+import { AuthContextProvider } from 'contexts/auth.context';
 import { NewsletterModalContextProvider, useNewsletterModalContext } from 'contexts/newsletter-modal.context';
 import { NavItems } from 'types';
 
@@ -57,36 +60,57 @@ function MyApp({ Component, pageProps }: AppProps) {
       <GlobalStyle />
 
       <Providers>
-        <Navbar items={navItems} />
-        <TinaEditProvider
-          editMode={
-            <TinaCMS
-              query={pageProps.query}
-              variables={pageProps.variables}
-              data={pageProps.data}
-              isLocalClient={!process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
-              branch={process.env.NEXT_PUBLIC_EDIT_BRANCH}
-              clientId={process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
-              {...pageProps}
-            >
-              {(livePageProps: any) => <Component {...livePageProps} />}
-            </TinaCMS>
-          }
-        >
-          <Component {...pageProps} />
-        </TinaEditProvider>
-        <Footer />
+        <AppContent Component={Component} pageProps={pageProps} />
       </Providers>
+    </>
+  );
+}
+
+function AppContent({ Component, pageProps }: { Component: React.ComponentType<any>; pageProps: any }) {
+  return (
+    <ProtectedRoute>
+      <AppLayout Component={Component} pageProps={pageProps} />
+    </ProtectedRoute>
+  );
+}
+
+function AppLayout({ Component, pageProps }: { Component: React.ComponentType<any>; pageProps: any }) {
+  const router = useRouter();
+  const isLoginPage = router?.pathname === '/login' || router?.asPath?.startsWith('/login');
+
+  return (
+    <>
+      {!isLoginPage && <Navbar items={navItems} />}
+      <TinaEditProvider
+        editMode={
+          <TinaCMS
+            query={pageProps.query}
+            variables={pageProps.variables}
+            data={pageProps.data}
+            isLocalClient={!process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
+            branch={process.env.NEXT_PUBLIC_EDIT_BRANCH}
+            clientId={process.env.NEXT_PUBLIC_TINA_CLIENT_ID}
+            {...pageProps}
+          >
+            {(livePageProps: any) => <Component {...livePageProps} />}
+          </TinaCMS>
+        }
+      >
+        <Component {...pageProps} />
+      </TinaEditProvider>
+      {!isLoginPage && <Footer />}
     </>
   );
 }
 
 function Providers<T>({ children }: PropsWithChildren<T>) {
   return (
-    <NewsletterModalContextProvider>
-      <Modals />
-      <NavigationDrawer items={navItems}>{children}</NavigationDrawer>
-    </NewsletterModalContextProvider>
+    <AuthContextProvider>
+      <NewsletterModalContextProvider>
+        <Modals />
+        <NavigationDrawer items={navItems}>{children}</NavigationDrawer>
+      </NewsletterModalContextProvider>
+    </AuthContextProvider>
   );
 }
 

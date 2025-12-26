@@ -275,3 +275,4 @@ export function exportToPDF(pedido: Pedido) {
     alert('Error al exportar a PDF. Por favor, intenta de nuevo.');
   }
 }
+

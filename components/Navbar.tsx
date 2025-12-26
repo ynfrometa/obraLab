@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { useAuthContext } from 'contexts/auth.context';
 import { useNewsletterModalContext } from 'contexts/newsletter-modal.context';
 import { ScrollPositionEffectProps, useScrollPosition } from 'hooks/useScrollPosition';
 import { type NavGroup, NavItems, SingleNavItem } from 'types';
@@ -22,6 +23,7 @@ type NavbarContainerProps = { hidden: boolean; transparent: boolean };
 export default function Navbar({ items }: NavbarProps) {
   const router = useRouter();
   const { toggle } = Drawer.useDrawer();
+  const { isAuthenticated, logout } = useAuthContext();
   const [scrollingDirection, setScrollingDirection] = useState<ScrollingDirections>('none');
 
   let lastScrollY = useRef(0);
@@ -83,6 +85,14 @@ export default function Navbar({ items }: NavbarProps) {
         <ColorSwitcherContainer>
           <ColorSwitcher />
         </ColorSwitcherContainer>
+        {isAuthenticated && (
+          <LogoutButton onClick={() => { 
+            logout(); 
+            router.push('/login');
+          }}>
+            Cerrar Sesión
+          </LogoutButton>
+        )}
         <HamburgerMenuWrapper>
           <HamburgerIcon aria-label="Toggle menu" onClick={toggle} />
         </HamburgerMenuWrapper>
@@ -320,4 +330,27 @@ const Content = styled(Container)`
 const ColorSwitcherContainer = styled.div`
   width: 4rem;
   margin: 0 1rem;
+`;
+
+const LogoutButton = styled.button`
+  background: transparent;
+  border: 2px solid rgb(var(--primary));
+  color: rgb(var(--primary));
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  margin-right: 1rem;
+
+  &:hover {
+    background-color: rgb(var(--primary));
+    color: rgb(var(--textSecondary));
+  }
+
+  ${media('<desktop')} {
+    display: none;
+  }
 `;
