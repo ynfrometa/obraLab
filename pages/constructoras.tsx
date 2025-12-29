@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 import Page from 'components/Page';
 import { media } from 'utils/media';
@@ -6,21 +5,11 @@ import ConstructoraFormSection from 'views/ConstructorasPage/ConstructoraFormSec
 import ConstructorasListSection from 'views/ConstructorasPage/ConstructorasListSection';
 
 export default function ConstructorasPage() {
-  const [showForm, setShowForm] = useState(false);
-
-  const handleShowForm = () => {
-    setShowForm(true);
-  };
-
-  const handleHideForm = () => {
-    setShowForm(false);
-  };
-
   return (
     <Page title="Constructoras" description="Gestiona y añade constructoras.">
       <ConstructorasContainer>
-        {showForm && <ConstructoraFormSection onSuccess={handleHideForm} />}
-        <ConstructorasListSection onShowForm={handleShowForm} />
+        <ConstructoraFormSection />
+        <ConstructorasListSection />
       </ConstructorasContainer>
     </Page>
   );
