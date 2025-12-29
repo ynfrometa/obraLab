@@ -31,7 +31,6 @@ const navItems: NavItems = [
   },
   { title: 'Hoja de Mediciones', href: '/hoja-mediciones' },
   { title: 'Hoja de Mediciones Precio', href: '/hoja-mediciones-precio' },
-  { title: 'Sign up', href: '/sign-up', outlined: true },
 ];
 
 const TinaCMS = dynamic(() => import('tinacms'), { ssr: false });
