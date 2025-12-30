@@ -80,6 +80,14 @@ export default function SingleArticlePage(props: InferGetStaticPropsType<typeof 
 }
 
 export async function getStaticPaths() {
+  // En producción/Vercel, TinaCMS no está disponible, retornar paths vacío
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_TINA_CLIENT_ID) {
+    return {
+      paths: [],
+      fallback: false,
+    };
+  }
+
   try {
     const postsListData = await staticRequest({
       query: `
@@ -113,7 +121,10 @@ export async function getStaticPaths() {
       fallback: false,
     };
   } catch (error) {
-    console.warn('Error fetching blog posts for static paths:', error);
+    // Solo mostrar el error en desarrollo, en producción es esperado
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching blog posts for static paths:', error);
+    }
     return {
       paths: [],
       fallback: false,
@@ -127,6 +138,14 @@ function normalizePostName(postName: string) {
 
 export async function getStaticProps({ params }: GetStaticPropsContext<{ slug: string }>) {
   const { slug } = params as { slug: string };
+  
+  // En producción/Vercel, TinaCMS no está disponible, retornar notFound
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_TINA_CLIENT_ID) {
+    return {
+      notFound: true as const,
+    };
+  }
+
   const variables = { relativePath: `${slug}.mdx` };
   const query = `
     query BlogPostQuery($relativePath: String!) {
@@ -159,7 +178,10 @@ export async function getStaticProps({ params }: GetStaticPropsContext<{ slug: s
       props: { slug, variables, query, data: data as { getPostsDocument: PostsDocument } },
     };
   } catch (error) {
-    console.warn('Error fetching blog post:', error);
+    // Solo mostrar el error en desarrollo, en producción es esperado
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error fetching blog post:', error);
+    }
     return {
       notFound: true as const,
     };
