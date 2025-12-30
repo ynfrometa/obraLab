@@ -16,26 +16,22 @@ const firebaseConfig = {
   measurementId: 'G-NKRCYP6V0E',
 };
 
-// Initialize Firebase
+// Initialize Firebase only on client side
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 let analytics: Analytics | null = null;
 
-try {
-  app = initializeApp(firebaseConfig);
-  // Configurar Firestore con opciones para mejorar la estabilidad de la conexión
-  if (typeof window !== 'undefined') {
+// Only initialize Firebase in the browser, not during static export
+if (typeof window !== 'undefined') {
+  try {
+    app = initializeApp(firebaseConfig);
     db = getFirestore(app);
-    // Configurar opciones de persistencia y caché para mejorar la estabilidad
-    // Estas opciones ayudan a manejar mejor los errores de conexión
-  } else {
-    db = getFirestore(app);
+    analytics = getAnalytics(app);
+  } catch (error) {
+    console.error('Error al inicializar Firebase:', error);
+    // En caso de error, db será undefined
+    db = undefined;
   }
-  analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-} catch (error) {
-  console.error('Error al inicializar Firebase:', error);
-  // En caso de error, db será undefined
-  db = undefined;
 }
 
 export { db as database, analytics };

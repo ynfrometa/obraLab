@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import Page from 'components/Page';
 import RichText from 'components/RichText';
 
-export default function ContactPage() {
+export default function CookiesPolicyPage() {
   return (
     <Page title="Cookies policy">
       <CookiesPolicyContainer>
