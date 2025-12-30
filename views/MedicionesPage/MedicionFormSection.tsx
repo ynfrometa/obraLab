@@ -331,21 +331,11 @@ export default function MedicionFormSection() {
                       {...register('obra', { required: true })}
                     >
                       <option value="">Selecciona una obra</option>
-                      {obrasList.map((obra) => {
-                        // Formatear empresa: si es array, unir con comas; si es string, usar directamente
-                        const empresaTexto = Array.isArray(obra.empresa) 
-                          ? obra.empresa.filter(Boolean).join(',')
-                          : obra.empresa || '';
-                        const empresaDisplay = Array.isArray(obra.empresa) 
-                          ? obra.empresa.filter(Boolean).join(', ')
-                          : obra.empresa || '';
-                        
-                        return (
-                          <option key={obra.id} value={empresaTexto}>
-                            {obra.descripcion || obra.id} - {empresaDisplay}
-                          </option>
-                        );
-                      })}
+                      {obrasList.map((obra) => (
+                        <option key={obra.id} value={obra.empresa}>
+                          {obra.empresa}
+                        </option>
+                      ))}
                     </SelectInput>
                   ) : (
                     <StyledInput
@@ -911,6 +901,14 @@ const SuccessMessage = styled.p`
   border-radius: 0.6rem;
   margin-bottom: 1.5rem;
   text-align: center;
+`;
+
+const HelperText = styled.p`
+  font-size: 1.2rem;
+  color: rgb(var(--text));
+  opacity: 0.7;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 `;
 
 const StyledInput = styled(Input)`

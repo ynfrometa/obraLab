@@ -24,7 +24,7 @@ interface Medicion {
   empresaTelefono1?: string;
   empresaTelefono2?: string;
   constructora?: string;
-  obra: string | string[]; // Puede ser string o array de strings
+  obra: string;
   fecha: string;
   conceptos?: ConceptoItem[];
   // Campos legacy para compatibilidad
@@ -79,7 +79,7 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       empresaTelefono1: medicion.empresaTelefono1 || '',
       empresaTelefono2: medicion.empresaTelefono2 || '',
       constructora: medicion.constructora || '',
-      obra: Array.isArray(medicion.obra) ? medicion.obra[0] || '' : (medicion.obra || ''),
+      obra: medicion.obra,
       fecha: medicion.fecha,
     },
   });
@@ -213,7 +213,7 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       alert('Todos los conceptos deben tener concepto, L y H');
       return;
     }
-
+    
     onSave({
       ...data,
       conceptos: conceptos,
@@ -265,21 +265,11 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
                     {...register('obra', { required: true })}
                   >
                     <option value="">Selecciona una obra</option>
-                    {obrasList.map((obra) => {
-                      // Formatear empresa: si es array, unir con comas; si es string, usar directamente
-                      const empresaTexto = Array.isArray(obra.empresa) 
-                        ? obra.empresa.filter(Boolean).join(',')
-                        : obra.empresa || '';
-                      const empresaDisplay = Array.isArray(obra.empresa) 
-                        ? obra.empresa.filter(Boolean).join(', ')
-                        : obra.empresa || '';
-                      
-                      return (
-                        <option key={obra.id} value={empresaTexto}>
-                          {obra.descripcion || obra.id} - {empresaDisplay}
-                        </option>
-                      );
-                    })}
+                    {obrasList.map((obra) => (
+                      <option key={obra.id} value={obra.empresa}>
+                        {obra.empresa}
+                      </option>
+                    ))}
                   </SelectInput>
                 ) : (
                   <StyledInput

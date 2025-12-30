@@ -2,7 +2,6 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { useAuthContext } from 'contexts/auth.context'
 import { NavItems } from 'types'
 import ClientOnly from './ClientOnly'
 import CloseIcon from './CloseIcon'
@@ -32,7 +31,6 @@ export default function NavigationDrawer({ children, items }: NavigationDrawerPr
 
 function NavItemsList({ items }: NavigationDrawerProps) {
   const { close } = OriginalDrawer.useDrawer()
-  const { isAuthenticated } = useAuthContext()
   const router = useRouter()
   const [openGroups, setOpenGroups] = useState<Set<number>>(new Set())
 
@@ -53,11 +51,6 @@ function NavItemsList({ items }: NavigationDrawerProps) {
       newOpenGroups.add(index)
     }
     setOpenGroups(newOpenGroups)
-  }
-
-  // No mostrar items si no está autenticado
-  if (!isAuthenticated) {
-    return null
   }
 
   return (

@@ -21,11 +21,7 @@ interface Worker {
   hireDate: number; // Timestamp en milisegundos
 }
 
-interface WorkersListSectionProps {
-  onShowForm?: () => void;
-}
-
-export default function WorkersListSection({ onShowForm }: WorkersListSectionProps) {
+export default function WorkersListSection() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
@@ -141,14 +137,7 @@ export default function WorkersListSection({ onShowForm }: WorkersListSectionPro
   if (loading) {
     return (
       <Wrapper>
-        <HeaderRow>
-          <SectionTitle>Lista de Trabajadores</SectionTitle>
-          {onShowForm && (
-            <AddButton onClick={onShowForm}>
-              + Añadir Nuevo Trabajador
-            </AddButton>
-          )}
-        </HeaderRow>
+        <SectionTitle>Lista de Trabajadores</SectionTitle>
         <EmptyState>Cargando trabajadores...</EmptyState>
       </Wrapper>
     );
@@ -157,29 +146,15 @@ export default function WorkersListSection({ onShowForm }: WorkersListSectionPro
   if (workers.length === 0) {
     return (
       <Wrapper>
-        <HeaderRow>
-          <SectionTitle>Lista de Trabajadores</SectionTitle>
-          {onShowForm && (
-            <AddButton onClick={onShowForm}>
-              + Añadir Nuevo Trabajador
-            </AddButton>
-          )}
-        </HeaderRow>
-        <EmptyState>No hay trabajadores registrados. Añade uno usando el botón de arriba.</EmptyState>
+        <SectionTitle>Lista de Trabajadores</SectionTitle>
+        <EmptyState>No hay trabajadores registrados. Añade uno usando el formulario de arriba.</EmptyState>
       </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      <HeaderRow>
-        <SectionTitle>Lista de Trabajadores</SectionTitle>
-        {onShowForm && (
-          <AddButton onClick={onShowForm}>
-            + Añadir Nuevo Trabajador
-          </AddButton>
-        )}
-      </HeaderRow>
+      <SectionTitle>Lista de Trabajadores</SectionTitle>
       <EditModal
         isOpen={!!editingWorker}
         onClose={handleCloseEdit}
@@ -494,44 +469,5 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
-`;
-
-const HeaderRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 2rem;
-
-  ${media('<=tablet')} {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-`;
-
-const AddButton = styled.button`
-  background: rgb(var(--primary));
-  color: rgb(var(--textSecondary));
-  border: 2px solid rgb(var(--primary));
-  padding: 1rem 2rem;
-  font-size: 1.4rem;
-  font-weight: bold;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: transform 0.2s, background 0.2s;
-  white-space: nowrap;
-
-  &:hover {
-    transform: scale(1.05);
-    background: rgba(var(--primary), 0.9);
-  }
-
-  ${media('<=phone')} {
-    width: 100%;
-    font-size: 1.2rem;
-    padding: 0.8rem 1.5rem;
-  }
 `;
 

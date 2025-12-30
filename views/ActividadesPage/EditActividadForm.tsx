@@ -62,18 +62,12 @@ export default function EditActividadForm({ actividad, onClose }: EditActividadF
       <Form onSubmit={handleSubmit(onSubmit)}>
         <InputStack>
           {errors.descripcion && <ErrorMessage>La descripción es requerida</ErrorMessage>}
-          <StyledInput
-            type="text"
+          <Textarea
+            as="textarea"
             placeholder="Descripción *"
             id="descripcion"
             disabled={isDisabled}
-            {...register('descripcion', { 
-              required: 'La descripción es requerida',
-              minLength: {
-                value: 1,
-                message: 'La descripción debe tener al menos un carácter'
-              }
-            })}
+            {...register('descripcion', { required: true })}
           />
         </InputStack>
         <ButtonGroup>
@@ -129,8 +123,10 @@ const SuccessMessage = styled.p`
   text-align: center;
 `;
 
-const StyledInput = styled(Input)`
+const Textarea = styled(Input)`
   width: 100%;
+  min-height: 8rem;
+  resize: vertical;
   font-size: 1.4rem;
   padding: 1rem 1.2rem;
   border: 2px solid rgba(var(--text), 0.25);

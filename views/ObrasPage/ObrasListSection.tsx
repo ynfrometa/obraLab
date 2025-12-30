@@ -25,11 +25,7 @@ interface Obra {
   fechaCreacion: number;
 }
 
-interface ObrasListSectionProps {
-  onShowForm?: () => void;
-}
-
-export default function ObrasListSection({ onShowForm }: ObrasListSectionProps) {
+export default function ObrasListSection() {
   const [obras, setObras] = useState<Obra[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingObra, setEditingObra] = useState<Obra | null>(null);
@@ -150,14 +146,7 @@ export default function ObrasListSection({ onShowForm }: ObrasListSectionProps) 
   if (loading) {
     return (
       <Wrapper>
-        <HeaderRow>
-          <SectionTitle>Lista de Obras</SectionTitle>
-          {onShowForm && (
-            <AddButton onClick={onShowForm}>
-              + Añadir Nueva Obra
-            </AddButton>
-          )}
-        </HeaderRow>
+        <SectionTitle>Lista de Obras</SectionTitle>
         <EmptyState>Cargando obras...</EmptyState>
       </Wrapper>
     );
@@ -166,29 +155,15 @@ export default function ObrasListSection({ onShowForm }: ObrasListSectionProps) 
   if (obras.length === 0) {
     return (
       <Wrapper>
-        <HeaderRow>
-          <SectionTitle>Lista de Obras</SectionTitle>
-          {onShowForm && (
-            <AddButton onClick={onShowForm}>
-              + Añadir Nueva Obra
-            </AddButton>
-          )}
-        </HeaderRow>
-        <EmptyState>No hay obras registradas. Añade una usando el botón de arriba.</EmptyState>
+        <SectionTitle>Lista de Obras</SectionTitle>
+        <EmptyState>No hay obras registradas. Añade una usando el formulario de arriba.</EmptyState>
       </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      <HeaderRow>
-        <SectionTitle>Lista de Obras</SectionTitle>
-        {onShowForm && (
-          <AddButton onClick={onShowForm}>
-            + Añadir Nueva Obra
-          </AddButton>
-        )}
-      </HeaderRow>
+      <SectionTitle>Lista de Obras</SectionTitle>
       <EditModal
         isOpen={!!editingObra}
         onClose={handleCloseEdit}
@@ -521,44 +496,5 @@ const EmptyState = styled.div`
   color: rgb(var(--text));
   opacity: 0.6;
   font-size: 1.8rem;
-`;
-
-const HeaderRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 2rem;
-
-  ${media('<=tablet')} {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-`;
-
-const AddButton = styled.button`
-  background: rgb(var(--primary));
-  color: rgb(var(--textSecondary));
-  border: 2px solid rgb(var(--primary));
-  padding: 1rem 2rem;
-  font-size: 1.4rem;
-  font-weight: bold;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: transform 0.2s, background 0.2s;
-  white-space: nowrap;
-
-  &:hover {
-    transform: scale(1.05);
-    background: rgba(var(--primary), 0.9);
-  }
-
-  ${media('<=phone')} {
-    width: 100%;
-    font-size: 1.2rem;
-    padding: 0.8rem 1.5rem;
-  }
 `;
 

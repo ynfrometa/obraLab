@@ -16,11 +16,7 @@ interface EmpresaPayload {
   email?: string;
 }
 
-interface EmpresaFormSectionProps {
-  onSuccess?: () => void;
-}
-
-export default function EmpresaFormSection({ onSuccess }: EmpresaFormSectionProps) {
+export default function EmpresaFormSection() {
   const [hasSuccessfullyAdded, setHasSuccessfullyAdded] = useState(false);
   const [hasErrored, setHasErrored] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -49,10 +45,7 @@ export default function EmpresaFormSection({ onSuccess }: EmpresaFormSectionProp
 
       setTimeout(() => {
         setHasSuccessfullyAdded(false);
-        if (onSuccess) {
-          onSuccess();
-        }
-      }, 2000);
+      }, 3000);
     } catch (error: any) {
       console.error('Error al añadir empresa:', error);
       const errorMsg = error?.message || error?.code || 'Error desconocido al conectar con Firebase';
@@ -86,14 +79,7 @@ export default function EmpresaFormSection({ onSuccess }: EmpresaFormSectionProp
 
   return (
     <Wrapper>
-      <FormHeader>
-        <SectionTitle>Añadir Nueva Empresa</SectionTitle>
-        {onSuccess && (
-          <CloseButton onClick={onSuccess} type="button">
-            ×
-          </CloseButton>
-        )}
-      </FormHeader>
+      <SectionTitle>Añadir Nueva Empresa</SectionTitle>
       {hasSuccessfullyAdded && <SuccessMessage>✓ Empresa añadida correctamente</SuccessMessage>}
       {hasErrored && <ErrorMessage>{errorMessage}</ErrorMessage>}
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -237,34 +223,6 @@ const SuccessMessage = styled.p`
   border-radius: 0.6rem;
   margin-bottom: 1.5rem;
   text-align: center;
-`;
-
-const FormHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 2rem;
-`;
-
-const CloseButton = styled.button`
-  background: rgb(var(--errorColor));
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  font-size: 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-
-  &:hover {
-    transform: scale(1.1);
-  }
 `;
 
 
