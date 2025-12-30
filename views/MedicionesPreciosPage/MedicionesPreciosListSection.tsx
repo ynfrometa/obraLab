@@ -16,6 +16,10 @@ interface ConceptoItem {
   alto: string;
   cantidad: string;
   total: string;
+  precioTrabajador?: string;
+  valorTrabajador?: string;
+  precioConstructora?: string;
+  valorConstructora?: string;
   observaciones?: string;
 }
 
@@ -313,11 +317,15 @@ export default function MedicionesListSection() {
                     <TableHeader>
                       <TableRow>
                         <TableHeaderCellActividad>Actividad</TableHeaderCellActividad>
-                        <TableHeaderCell style={{ width: '35%' }}>Concepto</TableHeaderCell>
-                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>L</TableHeaderCell>
-                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>H</TableHeaderCell>
-                        <TableHeaderCell style={{ width: '2%', textAlign: 'center', paddingLeft: '1.5rem' }}>N</TableHeaderCell>
-                        <TableHeaderCell style={{ width: '1.125%', textAlign: 'right' }}>Total</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '25%' }}>Concepto</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '3%', textAlign: 'center' }}>L</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '3%', textAlign: 'center' }}>H</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '3%', textAlign: 'center' }}>N</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '8%', textAlign: 'right' }}>Total</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Trabajador</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Trabajador</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Constructora</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Constructora</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -325,11 +333,19 @@ export default function MedicionesListSection() {
                         <TableRow key={idx}>
                           <TableCell style={{ whiteSpace: 'nowrap' }}>{concepto.actividad || ''}</TableCell>
                           <TableCell>{concepto.concepto}</TableCell>
-                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.largo}</TableCell>
-                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.alto}</TableCell>
-                          <TableCell style={{ textAlign: 'center', paddingLeft: '1.5rem', paddingRight: '0.5rem' }}>{concepto.cantidad || '1'}</TableCell>
+                          <TableCell style={{ textAlign: 'center' }}>{concepto.largo}</TableCell>
+                          <TableCell style={{ textAlign: 'center' }}>{concepto.alto}</TableCell>
+                          <TableCell style={{ textAlign: 'center' }}>{concepto.cantidad || '1'}</TableCell>
                           <TableCell style={{ textAlign: 'right' }}>
                             <TotalValue>{concepto.total || '0.00'}</TotalValue>
+                          </TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>{concepto.precioTrabajador || '0.00'}</TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>
+                            <TotalValue>{concepto.valorTrabajador || '0.00'}</TotalValue>
+                          </TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>{concepto.precioConstructora || '0.00'}</TableCell>
+                          <TableCell style={{ textAlign: 'right' }}>
+                            <TotalValue>{concepto.valorConstructora || '0.00'}</TotalValue>
                           </TableCell>
                         </TableRow>
                       ))}

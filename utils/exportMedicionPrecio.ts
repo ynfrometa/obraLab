@@ -7,6 +7,10 @@ interface ConceptoItem {
   alto: string;
   cantidad: string;
   total: string;
+  precioTrabajador?: string;
+  valorTrabajador?: string;
+  precioConstructora?: string;
+  valorConstructora?: string;
   observaciones?: string;
 }
 
@@ -43,15 +47,15 @@ export function exportToExcel(medicion: Medicion) {
   // Fila 2: Título "HOJA DE MEDICIONES PRECIO" (fusionado en columnas B-F)
   wsData.push(['', 'HOJA DE MEDICIONES PRECIO', '', '', '', '']);
 
-  // Fila 3: Nombre de la empresa (columnas D-F, alineado a la derecha)
-  wsData.push(['', '', '', medicion.empresaNombre || '', '', '']);
+  // Fila 3: Nombre de la empresa (columnas D-J, alineado a la derecha)
+  wsData.push(['', '', '', medicion.empresaNombre || '', '', '', '', '', '', '']);
 
-  // Fila 4: Email de la empresa (columnas D-F, alineado a la derecha)
-  wsData.push(['', '', '', medicion.empresaEmail || '', '', '']);
+  // Fila 4: Email de la empresa (columnas D-J, alineado a la derecha)
+  wsData.push(['', '', '', medicion.empresaEmail || '', '', '', '', '', '', '']);
 
-  // Fila 5: Teléfonos (columnas D-F, alineado a la derecha)
+  // Fila 5: Teléfonos (columnas D-J, alineado a la derecha)
   const telefonos = [medicion.empresaTelefono1, medicion.empresaTelefono2].filter(Boolean).join(', ');
-  wsData.push(['', '', '', telefonos, '', '']);
+  wsData.push(['', '', '', telefonos, '', '', '', '', '', '']);
 
   // Fila 6: Información del proyecto
   const fechaFormateada = medicion.fecha 
@@ -69,13 +73,13 @@ export function exportToExcel(medicion: Medicion) {
     ? medicion.obra.filter(Boolean).join(' ')
     : medicion.obra || '';
   
-  wsData.push(['', `Constructora: ${medicion.constructora || ''}`, `Obra: ${obraTexto}`, '', `Fecha: ${fechaFormateada}`, '']);
+  wsData.push(['', `Constructora: ${medicion.constructora || ''}`, `Obra: ${obraTexto}`, '', `Fecha: ${fechaFormateada}`, '', '', '', '', '']);
 
   // Fila 7: Vacía (separador)
   wsData.push([]);
 
   // Fila 8: Encabezados de la tabla
-  wsData.push(['Actividad', 'Concepto', 'L', 'H', 'N', 'Total']);
+  wsData.push(['Actividad', 'Concepto', 'L', 'H', 'N', 'Total', 'Precio Trabajador', 'Valor Trabajador', 'Precio Constructora', 'Valor Constructora']);
 
   // Función para formatear números con comas como separador decimal
   const formatearNumero = (valor: string): string => {
@@ -94,7 +98,11 @@ export function exportToExcel(medicion: Medicion) {
         formatearNumero(concepto.largo),
         formatearNumero(concepto.alto),
         concepto.cantidad || '',
-        formatearNumero(concepto.total || '0')
+        formatearNumero(concepto.total || '0'),
+        formatearNumero(concepto.precioTrabajador || '0'),
+        formatearNumero(concepto.valorTrabajador || '0'),
+        formatearNumero(concepto.precioConstructora || '0'),
+        formatearNumero(concepto.valorConstructora || '0')
       ]);
     });
   }
@@ -105,23 +113,27 @@ export function exportToExcel(medicion: Medicion) {
   // Ajustar anchos de columnas
   ws['!cols'] = [
     { wch: 15 }, // A - Actividad
-    { wch: 50 }, // B - Concepto
-    { wch: 10 }, // C - L
-    { wch: 10 }, // D - H
-    { wch: 10 }, // E - N
-    { wch: 12 }  // F - Total
+    { wch: 40 }, // B - Concepto
+    { wch: 8 },  // C - L
+    { wch: 8 },  // D - H
+    { wch: 8 },  // E - N
+    { wch: 12 }, // F - Total
+    { wch: 15 }, // G - Precio Trabajador
+    { wch: 15 }, // H - Valor Trabajador
+    { wch: 18 }, // I - Precio Constructora
+    { wch: 15 }  // J - Valor Constructora
   ];
 
   // Fusionar celdas y aplicar formato
   if (!ws['!merges']) ws['!merges'] = [];
   
-  // Título "HOJA DE MEDICIONES PRECIO" fusionado en B2:F2 (fila 2, columnas B-F)
-  ws['!merges'].push({ s: { r: 1, c: 1 }, e: { r: 1, c: 5 } });
+  // Título "HOJA DE MEDICIONES PRECIO" fusionado en B2:J2 (fila 2, columnas B-J)
+  ws['!merges'].push({ s: { r: 1, c: 1 }, e: { r: 1, c: 9 } });
   
-  // Información de empresa fusionada (D3:F3, D4:F4, D5:F5)
-  ws['!merges'].push({ s: { r: 2, c: 3 }, e: { r: 2, c: 5 } }); // Nombre empresa
-  ws['!merges'].push({ s: { r: 3, c: 3 }, e: { r: 3, c: 5 } }); // Email
-  ws['!merges'].push({ s: { r: 4, c: 3 }, e: { r: 4, c: 5 } }); // Teléfonos
+  // Información de empresa fusionada (D3:J3, D4:J4, D5:J5)
+  ws['!merges'].push({ s: { r: 2, c: 3 }, e: { r: 2, c: 9 } }); // Nombre empresa
+  ws['!merges'].push({ s: { r: 3, c: 3 }, e: { r: 3, c: 9 } }); // Email
+  ws['!merges'].push({ s: { r: 4, c: 3 }, e: { r: 4, c: 9 } }); // Teléfonos
 
   // Definir estilo de borde
   const borderStyle = {
@@ -169,7 +181,7 @@ export function exportToExcel(medicion: Medicion) {
   });
 
   // Encabezados de tabla en negrita, centrados y con bordes
-  ['A8', 'B8', 'C8', 'D8', 'E8', 'F8'].forEach(cellRef => {
+  ['A8', 'B8', 'C8', 'D8', 'E8', 'F8', 'G8', 'H8', 'I8', 'J8'].forEach(cellRef => {
     const cell = ws[cellRef];
     if (cell) {
       cell.s = {
@@ -188,16 +200,21 @@ export function exportToExcel(medicion: Medicion) {
   
   // Aplicar bordes a todas las celdas de datos
   for (let row = startDataRowIndex; row < startDataRowIndex + numConceptos; row++) {
-    for (let col = 0; col < 6; col++) {
+    for (let col = 0; col < 10; col++) {
       const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
       const cell = ws[cellRef];
       if (cell) {
         if (!cell.s) cell.s = {};
         cell.s.border = borderStyle;
-        // Centrar columnas numéricas (L, H, N, Total) - columnas C, D, E, F (índices 2, 3, 4, 5)
-        if (col >= 2) {
+        // Centrar columnas numéricas (L, H, N) - columnas C, D, E (índices 2, 3, 4)
+        // Alinear a la derecha columnas de precios - columnas F, G, H, I, J (índices 5, 6, 7, 8, 9)
+        if (col >= 2 && col <= 4) {
           if (!cell.s.alignment) cell.s.alignment = {};
           cell.s.alignment.horizontal = 'center';
+          cell.s.alignment.vertical = 'center';
+        } else if (col >= 5) {
+          if (!cell.s.alignment) cell.s.alignment = {};
+          cell.s.alignment.horizontal = 'right';
           cell.s.alignment.vertical = 'center';
         }
       } else {
@@ -214,8 +231,8 @@ export function exportToExcel(medicion: Medicion) {
     }
   }
 
-  // Aplicar bordes a las celdas fusionadas del título (B2:F2)
-  ['B2', 'C2', 'D2', 'E2', 'F2'].forEach(cellRef => {
+  // Aplicar bordes a las celdas fusionadas del título (B2:J2)
+  ['B2', 'C2', 'D2', 'E2', 'F2', 'G2', 'H2', 'I2', 'J2'].forEach(cellRef => {
     const cell = ws[cellRef];
     if (cell) {
       if (!cell.s) cell.s = {};
@@ -223,8 +240,8 @@ export function exportToExcel(medicion: Medicion) {
     }
   });
 
-  // Aplicar bordes a las celdas fusionadas de la empresa (D3:F3, D4:F4, D5:F5)
-  ['D3', 'E3', 'F3', 'D4', 'E4', 'F4', 'D5', 'E5', 'F5'].forEach(cellRef => {
+  // Aplicar bordes a las celdas fusionadas de la empresa (D3:J3, D4:J4, D5:J5)
+  ['D3', 'E3', 'F3', 'G3', 'H3', 'I3', 'J3', 'D4', 'E4', 'F4', 'G4', 'H4', 'I4', 'J4', 'D5', 'E5', 'F5', 'G5', 'H5', 'I5', 'J5'].forEach(cellRef => {
     const cell = ws[cellRef];
     if (cell) {
       if (!cell.s) cell.s = {};
@@ -326,7 +343,11 @@ export function exportToPDF(medicion: Medicion) {
         concepto.largo || '',
         concepto.alto || '',
         concepto.cantidad || '',
-        concepto.total || '0.00'
+        concepto.total || '0.00',
+        concepto.precioTrabajador || '0.00',
+        concepto.valorTrabajador || '0.00',
+        concepto.precioConstructora || '0.00',
+        concepto.valorConstructora || '0.00'
       ]);
     });
   }
@@ -334,7 +355,7 @@ export function exportToPDF(medicion: Medicion) {
     // Agregar tabla usando autoTable
     const tableOptions = {
       startY: 55,
-      head: [['Actividad', 'Concepto', 'L', 'H', 'N', 'Total']],
+      head: [['Actividad', 'Concepto', 'L', 'H', 'N', 'Total', 'Precio Trabajador', 'Valor Trabajador', 'Precio Constructora', 'Valor Constructora']],
       body: tableData,
       theme: 'grid',
       headStyles: {
@@ -348,12 +369,16 @@ export function exportToPDF(medicion: Medicion) {
         cellPadding: 2
       },
       columnStyles: {
-        0: { cellWidth: 25 }, // Actividad
-        1: { cellWidth: 80 }, // Concepto
-        2: { cellWidth: 20 }, // L
-        3: { cellWidth: 20 }, // H
-        4: { cellWidth: 20 }, // N
-        5: { cellWidth: 25 }  // Total
+        0: { cellWidth: 20 }, // Actividad
+        1: { cellWidth: 50 }, // Concepto
+        2: { cellWidth: 15 }, // L
+        3: { cellWidth: 15 }, // H
+        4: { cellWidth: 15 }, // N
+        5: { cellWidth: 20 },  // Total
+        6: { cellWidth: 25 },  // Precio Trabajador
+        7: { cellWidth: 25 },  // Valor Trabajador
+        8: { cellWidth: 30 },  // Precio Constructora
+        9: { cellWidth: 25 }   // Valor Constructora
       },
       margin: { left: 20, right: 20 }
     };

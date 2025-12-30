@@ -14,6 +14,10 @@ interface ConceptoItem {
   alto: string;
   cantidad: string;
   total: string;
+  precioTrabajador?: string;
+  valorTrabajador?: string;
+  precioConstructora?: string;
+  valorConstructora?: string;
   observaciones?: string;
 }
 
@@ -172,6 +176,10 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       alto: '',
       cantidad: '1',
       total: '0',
+      precioTrabajador: '0',
+      valorTrabajador: '0',
+      precioConstructora: '0',
+      valorConstructora: '0',
       observaciones: '',
     };
     setConceptos([...conceptos, nuevoConcepto]);
@@ -195,6 +203,15 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
       const cantidad = parseFloat(concepto.cantidad) || 1;
       concepto.total = (largo * alto * cantidad).toFixed(2);
     }
+    
+    // Calcular Valor Trabajador = Precio Trabajador x Total
+    const precioTrabajador = parseFloat(concepto.precioTrabajador || '0');
+    const total = parseFloat(concepto.total || '0');
+    concepto.valorTrabajador = (precioTrabajador * total).toFixed(2);
+    
+    // Calcular Valor Constructora = Precio Constructora x Total
+    const precioConstructora = parseFloat(concepto.precioConstructora || '0');
+    concepto.valorConstructora = (precioConstructora * total).toFixed(2);
     
     nuevosConceptos[index] = concepto;
     setConceptos(nuevosConceptos);
@@ -396,13 +413,17 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell style={{ width: '12%' }}>Actividad</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto' }}>Concepto</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>L</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>H</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '7.5%', textAlign: 'center' }}>N</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '3.75%' }}>Total</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '4.5%' }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '10%' }}>Actividad</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '20%' }}>Concepto</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>L</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>H</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>N</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '8%', textAlign: 'right' }}>Total</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Trabajador</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Trabajador</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Constructora</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Constructora</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '3%' }}></TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -492,8 +513,34 @@ export default function EditMedicionForm({ medicion, onSave, onCancel }: EditMed
                         />
                       </TotalCell>
                     </TableCell>
-                    <TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
                       <TotalCell>{concepto.total || '0.00'}</TotalCell>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <TableInputNumber
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        disabled={isSubmitting}
+                        value={concepto.precioTrabajador || '0'}
+                        onChange={(e) => actualizarConcepto(index, 'precioTrabajador', e.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <TotalCell>{concepto.valorTrabajador || '0.00'}</TotalCell>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <TableInputNumber
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        disabled={isSubmitting}
+                        value={concepto.precioConstructora || '0'}
+                        onChange={(e) => actualizarConcepto(index, 'precioConstructora', e.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <TotalCell>{concepto.valorConstructora || '0.00'}</TotalCell>
                     </TableCell>
                     <TableCell>
                       <DeleteRowButton type="button" onClick={() => eliminarConcepto(index)} disabled={isSubmitting}>
