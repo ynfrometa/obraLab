@@ -478,11 +478,11 @@ export default function MedicionFormSection() {
                     <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>L</TableHeaderCell>
                     <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>H</TableHeaderCell>
                     <TableHeaderCell style={{ width: '5%', textAlign: 'center' }}>N</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '8%', textAlign: 'right' }}>Total</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Trabajador</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Trabajador</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Precio Constructora</TableHeaderCell>
-                    <TableHeaderCell style={{ width: '10%', textAlign: 'right' }}>Valor Constructora</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '8%', textAlign: 'center' }}>Total</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '8%', textAlign: 'center' }}>Precio Trabajador</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '8%', textAlign: 'center' }}>Valor Trabajador</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '8%', textAlign: 'center' }}>Precio Constructora</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '8%', textAlign: 'center' }}>Valor Constructora</TableHeaderCell>
                     <TableHeaderCell style={{ width: '3%', padding: '0.5rem' }}></TableHeaderCell>
                   </TableRow>
                 </TableHeader>
